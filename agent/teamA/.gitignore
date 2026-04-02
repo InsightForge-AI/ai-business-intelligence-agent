@@ -49,3 +49,5 @@ Thumbs.db
 
 # Team Lead Backups
 _backup/
+
+docs/*.md
