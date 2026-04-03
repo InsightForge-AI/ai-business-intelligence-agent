@@ -9,7 +9,10 @@ def clean_text(text):
 
 
 def preprocess_data():
-    df = pd.read_json("rag\\Team_D\\Ecommerce_FAQ_Chatbot_dataset.json")
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    json_path = os.path.join(base_dir, 'Ecommerce_FAQ_Chatbot_dataset.json')
+
+    df = pd.read_json(json_path)
     df = pd.json_normalize(df['questions'])
 
     df = df.dropna()
@@ -17,12 +20,10 @@ def preprocess_data():
 
     qa_pairs = df.apply(
         lambda row: {
-            "question": clean_text(row['question']),
-            "answer": clean_text(row['answer'])
+            'question': clean_text(row['question']),
+            'answer': clean_text(row['answer'])
         },
         axis=1
     ).tolist()
 
     return qa_pairs
-
-qa_pairs = preprocess_data()

@@ -1,29 +1,29 @@
-import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from preprocessing.preprocessing import preprocess_data
 
-qa_pairs = preprocess_data()
-
 def chunk_data(qa_pairs):
     chunks = []
-
     for qa in qa_pairs:
-        # Each Q&A = one chunk (best for FAQ)
         chunk = "Question: {} Answer: {}".format(qa['question'], qa['answer'])
         chunks.append(chunk)
-
     return chunks
 
-chunks = chunk_data(qa_pairs)
 
-# Create folder if not exists
-os.makedirs("rag/Team_D/data", exist_ok=True)
+def build_faq_file():
+    qa_pairs = preprocess_data()
+    chunks = chunk_data(qa_pairs)
 
-# Save chunks to file
-with open("rag/Team_D/data/faq.txt", "w", encoding="utf-8") as f:
-    for chunk in chunks:
-        f.write(chunk + "\n")
-print("Chunks saved to data/faq.txt")
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    data_dir = os.path.join(base_dir, 'data')
+    os.makedirs(data_dir, exist_ok=True)
 
+    faq_path = os.path.join(data_dir, 'faq.txt')
+    with open(faq_path, 'w', encoding='utf-8') as f:
+        for chunk in chunks:
+            f.write(chunk + '\n')
+
+    print(f'Chunks saved to {faq_path}')
+    return faq_path
