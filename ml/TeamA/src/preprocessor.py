@@ -63,8 +63,4 @@ def preprocess(filepath):
 
 if __name__ == "__main__":
     df = preprocess("ml/TeamA/data/sales_data.csv")
-<<<<<<< HEAD
     print(df.head())
-=======
-    print(df.head())
->>>>>>> cb13bc72eb422494626f895335300502633c5037
