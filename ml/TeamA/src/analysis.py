@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+import sys
 
 def analyze(df):
     """
@@ -18,11 +20,11 @@ def analyze(df):
 
     # trend calculation logic
     if second_half > first_half * 1.05:
-        trend = 'increasing'
+        trend = 'Increasing'
     elif second_half < first_half * 0.95:
-        trend = 'decreasing'
+        trend = 'Decreasing'
     else:
-        trend = 'stable'
+        trend = 'Stable'
 
     return {
         'total_sales': total_sales,
@@ -31,8 +33,6 @@ def analyze(df):
     }
 
 if __name__ == "__main__":
-    import os
-    import sys
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
     

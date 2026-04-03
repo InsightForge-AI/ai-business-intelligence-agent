@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 def preprocess(filepath):
 
     df = pd.read_csv(filepath)
@@ -45,7 +46,7 @@ def preprocess(filepath):
     df['total_sales'] = df['total_sales'].fillna(df['total_sales'].median())
 
     # converting the date column to datetime format
-    df['date'] = pd.to_datetime(df['date'], dayfirst=True, errors='coerce')
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
     df = df.dropna(subset=['date'])
 
     # keeping only the columns needed for analysis
@@ -61,8 +62,8 @@ def preprocess(filepath):
     return df
 
 if __name__ == "__main__":
+    
     import os
-    # Get the directory where THIS file (preprocessor.py) lives
     current_dir = os.path.dirname(__file__)
     
     path = os.path.abspath(os.path.join(current_dir, "..", "data", "sales_data.csv"))
