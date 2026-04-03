@@ -2,15 +2,14 @@ def get_keywords(text):
 
     words = text.split()
 
-    stop_words = [
-        "the", "is", "and",
-        "but", "very", "for"
-    ]
+    stop_words = ["the", "is", "and", "but"]
 
     keywords = []
 
     for word in words:
+
         word = word.lower().strip(".,")
+        
         if word not in stop_words:
             keywords.append(word)
 
@@ -18,3 +17,13 @@ def get_keywords(text):
             break
 
     return keywords
+
+
+# TEST BLOCK
+if __name__ == "__main__":
+
+    text = "This product is very good and useful"
+
+    result = get_keywords(text)
+
+    print(result)
