@@ -62,5 +62,16 @@ def preprocess(filepath):
     return df
 
 if __name__ == "__main__":
-    df = preprocess("ml/TeamA/data/sales_data.csv")
-    print(df.head())
+    
+    import os
+    current_dir = os.path.dirname(__file__)
+    
+    path = os.path.abspath(os.path.join(current_dir, "..", "data", "sales_data.csv"))
+    
+    print(f"Testing preprocessor with: {path}")
+    
+    try:
+        df = preprocess(path)
+        print(df.head())
+    except Exception as e:
+        print(f"Error during testing: {e}")
