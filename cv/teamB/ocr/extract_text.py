@@ -1,31 +1,45 @@
-import os
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-
 import easyocr
+from pathlib import Path
+import json
 
-reader = easyocr.Reader(['en'])
+# Paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+RAW_DIR = BASE_DIR / "data" / "raw"
+OUTPUT_DIR = BASE_DIR / "data" / "processed" / "ocr"
+
+# OCR model
+reader = easyocr.Reader(['en'], gpu=False)
 
 def extract_text(image_path):
-    results = reader.readtext(image_path)
-    
-    texts = []
-    for (bbox, text, confidence) in results:
-        if confidence > 0.3:
-            texts.append(text)
-    
-    return texts
+    results = reader.readtext(str(image_path))
+    return [text for (_, text, conf) in results if conf > 0.3]
 
+def run():
+    print("📂 Using path:", RAW_DIR)
 
-def process_folder(folder_path):
-    all_results = {}
-    
-    for filename in os.listdir(folder_path):
-        if filename.endswith(('.jpg', '.jpeg', '.png')):
-            full_path = os.path.join(folder_path, filename)
-            extracted = extract_text(full_path)
-            all_results[filename] = extracted
-            print(f"{filename} -> {extracted}")
-    
-    return all_results
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-process_folder(r"D:\cv_prj\ai-business-intelligence-agent\cv\teamB\data\raw")
+    images = list(RAW_DIR.glob("*.png")) + list(RAW_DIR.glob("*.jpg"))
+
+    if not images:
+        print("❌ No images found")
+        return
+
+    all_results = []
+
+    for img in images:
+        text = extract_text(img)
+        print(img.name, "→", text)
+
+        all_results.append({
+            "image": img.name,
+            "text": text
+        })
+
+    with open(OUTPUT_DIR / "ocr_results.json", "w") as f:
+        json.dump(all_results, f, indent=2)
+
+    print("✅ Done!")
+
+if __name__ == "__main__":
+    run()
