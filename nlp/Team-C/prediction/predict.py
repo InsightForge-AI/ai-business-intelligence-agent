@@ -1,5 +1,5 @@
 import pickle
-from preprocessing import clean_text
+from preprocessing.preprocessing import clean_text
 
 # Load model
 model = pickle.load(open("model.pkl", "rb"))
