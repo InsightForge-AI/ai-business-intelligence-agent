@@ -43,3 +43,6 @@ def run():
 
 if __name__ == "__main__":
     run()
+def extract_text(image):
+    # dummy logic
+    return "Sample extracted text"

@@ -93,3 +93,6 @@ if __name__ == "__main__":
     start = time.time()
     run()
     print(f"\nFinished in {time.time() - start:.2f} sec")
+def generate_caption(image):
+    # dummy logic
+    return "A person is standing near a car"
