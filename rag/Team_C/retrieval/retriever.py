@@ -1,4 +1,4 @@
-from rag.teamC.vector_store.store import load_documents
+from rag.Team_C.vector_store.store import load_documents
 
 
 def retrieve_documents(tokens):
