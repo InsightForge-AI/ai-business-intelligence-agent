@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-app = FastAPI(title="AI Business Intelligence API - Sahil")
+app = FastAPI(title="AI Business Intelligence API - Gunvant")
 
 # ------------------------
 # User Model
