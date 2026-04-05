@@ -16,7 +16,10 @@ def clean_text(text):
     text = text.lower()
     text = re.sub(r'[^a-z\s]', '', text)
     words = text.split()
-    words = [word for word in words if word not in stop_words]
+
+    # ❗ keep important words like "not"
+    words = [word for word in words if word not in stop_words or word == "not"]
+
     return " ".join(words)
 
 
