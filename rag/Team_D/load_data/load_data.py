@@ -19,7 +19,6 @@ def load_faq_data(file_path):
             if len(qa) > 1:
                 answer = qa[1].strip()   # ONLY ANSWER
                 docs.append(answer)
-    print(docs)
     return docs
 
 if __name__ == "__main__":
