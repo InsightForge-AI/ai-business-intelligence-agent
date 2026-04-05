@@ -1,5 +1,5 @@
-from preprocess import clean_text
-from utils import split_sentences
+from .preprocess import clean_text
+from .utils import split_sentences
 
 def summarize(text):
 
