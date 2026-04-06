@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "text": "This product is good and easy to use. I really liked it."
+  },
+  {
+    "id": 2,
+    "text": "The service was bad and very slow. Not recommended."
+  },
+  {
+    "id": 3,
+    "text": "The experience was average but acceptable overall."
+  },
+  {
+    "id": 4,
+    "text": "Excellent quality and great performance. Worth buying."
+  },
+  {
+    "id": 5,
+    "text": "Poor packaging and bad customer support."
+  },
+  {
+    "id": 6,
+    "text": "Amazing features and good value for money."
+  },
+  {
+    "id": 7,
+    "text": "Worst experience ever. Very disappointing."
+  },
+  {
+    "id": 8,
+    "text": "Nice design but performance is average."
+  },
+  {
+    "id": 9,
+    "text": "Great service and excellent response time."
+  },
+  {
+    "id": 10,
+    "text": "Not bad, but could be better."
+  }
+]
