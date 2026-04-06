@@ -15,14 +15,8 @@ from Summary.summarizer import summarize
 app = FastAPI()
 
 
-# Home Route
-@app.get("/")
-def home():
-    return {"message": "Team-B NLP API Running Successfully"}
-
-
 # Analyze Text from Request
-@app.post("/analyze")
+@app.post("/nlp/analyze")
 def analyze_text(data: dict):
 
     text = data.get("text")
@@ -39,8 +33,8 @@ def analyze_text(data: dict):
     return {
         "text": text,
         "sentiment": sentiment_result,
+        "summary": summary_result,
         "keywords": keywords_result,
-        "summary": summary_result
     }
 
 
