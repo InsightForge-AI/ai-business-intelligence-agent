@@ -1,3 +1,5 @@
+# This module is done by Vaishnavi
+
 import chromadb
 from chromadb.config import Settings
 
