@@ -1,4 +1,3 @@
-# pipeline/rag_pipeline.py
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
@@ -11,20 +10,20 @@ RAW_PATH     = os.path.join(BASE_DIR, "data", "raw", "document.json")
 CLEANED_DIR  = os.path.join(BASE_DIR, "data", "cleaned")
 CLEANED_PATH = os.path.join(CLEANED_DIR, "pipeline_results.json")
 
-# ─── Load documents from document.json ────────────────────────
+# ─── Load documents ───────────────────────────────────────────
 with open(RAW_PATH, "r") as f:
     documents = json.load(f)
 
-# ─── Build FAISS index (Nanditha's original style) ────────────
-model      = SentenceTransformer("all-MiniLM-L6-v2")
-contents   = [doc["content"] for doc in documents]
+# ─── Build FAISS index ────────────────────────────────────────
+model = SentenceTransformer("all-MiniLM-L6-v2", cache_folder="./model_cache")
+contents = [doc["content"] for doc in documents]
 embeddings = model.encode(contents)
 embeddings = np.array(embeddings).astype("float32")
 
 index = faiss.IndexFlatL2(embeddings.shape[1])
 index.add(embeddings)
 
-# ─── Search Function (Nanditha's original) ────────────────────
+# ─── Search Function ──────────────────────────────────────────
 def search_pipeline(query: str, top_k: int = 3):
     query_embedding = model.encode([query]).astype("float32")
     distances, indices = index.search(query_embedding, top_k)
@@ -32,10 +31,10 @@ def search_pipeline(query: str, top_k: int = 3):
     for i, idx in enumerate(indices[0]):
         doc = documents[idx]
         results.append({
-            "title":    doc["title"],
+            "title": doc["title"],
             "category": doc["category"],
-            "content":  doc["content"],
-            "score":    round(1 / (1 + distances[0][i]), 4)
+            "content": doc["content"],
+            "score": float(round(1 / (1 + distances[0][i]), 4))  # ← FIXED ✅
         })
     return results
 
@@ -44,12 +43,12 @@ if __name__ == "__main__":
     os.makedirs(CLEANED_DIR, exist_ok=True)
 
     test_query = "delivery issues"
-    results    = search_pipeline(test_query)
+    results = search_pipeline(test_query)
 
     output = {
-        "query":         test_query,
+        "query": test_query,
         "total_results": len(results),
-        "results":       results
+        "results": results
     }
 
     with open(CLEANED_PATH, "w") as f:
