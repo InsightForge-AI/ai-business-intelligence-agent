@@ -17,7 +17,7 @@ class TextInput(BaseModel):
     text: str
 
 # 2 & 3. Function inside API
-@app.post("/match-keywords")
+@app.post("/rag/query")
 def match_keywords(input_data: TextInput):
     text = input_data.text.lower()
     matched_words = []
