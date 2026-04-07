@@ -1,10 +1,9 @@
+# This module is done by Chandrashekar
+
 from rag.Team_D.load_data.load_data import load_faq_data
 from rag.Team_D.embedding.embedding import get_embeddings, model
 from rag.Team_D.retrieval.retrievl import create_collection, search
 
-# -----------------------------
-# Load + initialize (runs once)
-# -----------------------------
 
 docs = load_faq_data(r"rag\Team_D\data\faq.txt")
 
