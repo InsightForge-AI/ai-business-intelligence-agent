@@ -93,3 +93,7 @@ if __name__ == "__main__":
     start = time.time()
     run()
     print(f"\nFinished in {time.time() - start:.2f} sec")
+    print(f"\nFinished in {time.time() - start:.2f} sec")
+def detect_objects(image):
+    # dummy logic
+    return ["person", "car"]
