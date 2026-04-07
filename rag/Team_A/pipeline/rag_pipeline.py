@@ -1,18 +1,21 @@
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
-import importlib.util
+import json
+import os
 
-spec = importlib.util.spec_from_file_location("document", "../data/document.py")
-doc_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(doc_module)
-documents = doc_module.documents
+# Load documents from JSON file
+file_path = os.path.join(os.path.dirname(__file__), "..", "data", "cleaned", "document_cleaned.json")
+with open(file_path, "r", encoding="utf-8") as f:
+    documents = json.load(f)
 
+# Load model and encode documents
 model = SentenceTransformer("all-MiniLM-L6-v2")
 contents = [doc["content"] for doc in documents]
 embeddings = model.encode(contents)
 embeddings = np.array(embeddings).astype("float32")
 
+# Build FAISS index
 index = faiss.IndexFlatL2(embeddings.shape[1])
 index.add(embeddings)
 
@@ -30,3 +33,8 @@ def search_pipeline(query: str, top_k: int = 3):
             "score": round(1 / (1 + distances[0][i]), 4)
         })
     return results
+
+if __name__ == "__main__":
+    results = search_pipeline("sales report")
+    for r in results:
+        print(r["title"], "->", r["category"], "| score:", r["score"])
