@@ -1,9 +1,24 @@
 {
-    "query": "delivery issues",
+    "query": "sales report",
     "total_results": 3,
     "results": [
         {
-            "title": "Delivery Issues Report",
-            "category": "Logistics",
-            "content": "Late deliveries and delayed shipments. Customers receiving orders after 10-12 days. Very frustrating experience.",
-            "score": 
+            "title": "Quarterly Sales Report",
+            "category": "Sales",
+            "content": "sales have dropped significantly over the last 3 months marketing campaigns were reduced competitors launched aggressive offers",
+            "score": 0.44269999861717224
+        },
+        {
+            "title": "Product Quality Review",
+            "category": "Quality",
+            "content": "some products have inconsistent quality customers reported defects broken items poor durability",
+            "score": 0.4269999861717224
+        },
+        {
+            "title": "Competitor Analysis",
+            "category": "Market",
+            "content": "competitors offering heavy discounts faster delivery better service attracting our customers",
+            "score": 0.40529999136924744
+        }
+    ]
+}
