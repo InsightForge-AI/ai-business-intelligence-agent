@@ -21,4 +21,4 @@ def rag_query(data: dict):
 
     response = build_response(query, ranked_docs, top_k)
 
-    return response
+    return {"context": response}
