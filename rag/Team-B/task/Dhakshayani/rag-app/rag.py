@@ -28,7 +28,7 @@ embeddings = HuggingFaceEmbeddings(
 db = FAISS.from_documents(docs, embeddings)
 
 #  Step 5: API Endpoint
-@app.get("/ask")
+@app.get("/rag/query")
 def ask_question(query: str):
     results = db.similarity_search(query, k=2)
 
