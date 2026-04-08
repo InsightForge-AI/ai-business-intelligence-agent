@@ -26,26 +26,12 @@ class QueryRequest(BaseModel):
 def home():
     return {"message": "AI Business Intelligence Agent API is running!"}
 
-@app.post("/search/keyword")
-def keyword_search(request: QueryRequest):
-    try:
-        results = search(request.query, documents)
-        return {
-            "query": request.query,
-            "total_results": len(results),
-            "results": results
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-@app.post("/search/semantic")
-def semantic_search(request: QueryRequest):
-    try:
-        results = search_pipeline(request.query)
-        return {
-            "query": request.query,
-            "total_results": len(results),
-            "results": results
-        }
-    except Exception as e:
-        return {"error": str(e)}
+@app.post("/rag/query")
+def rag_query(request: QueryRequest):
+    results = search_pipeline(request.query)
+    
+    return {
+        "query": request.query,
+        "total_results": len(results),
+        "results": results
+    }
