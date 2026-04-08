@@ -1,5 +1,3 @@
-# Document Loading
-
 documents = [
     {
         "id": 1,
