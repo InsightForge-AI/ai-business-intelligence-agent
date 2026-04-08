@@ -26,7 +26,7 @@ def root():
     return {"message": "RAG API running"}
 
 
-@app.post("/ask")
+@app.post("/rag/query")
 def ask_question(request: QueryRequest):
     results = search(request.query, model, collection)
 
