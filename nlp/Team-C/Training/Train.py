@@ -3,7 +3,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from preprocessing import clean_text
+from preprocessing.preprocessing import clean_text
 
 # Load dataset
 df = pd.read_csv("data/dataset.csv", encoding='latin-1')
