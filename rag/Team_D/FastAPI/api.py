@@ -1,4 +1,4 @@
-# FastAPI entrypoint placeholder
+# This module is done by Vaishnavi
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -26,7 +26,7 @@ def root():
     return {"message": "RAG API running"}
 
 
-@app.post("/ask")
+@app.post("/rag/query")
 def ask_question(request: QueryRequest):
     results = search(request.query, model, collection)
 
