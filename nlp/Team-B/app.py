@@ -4,13 +4,11 @@ import os
 import json
 
 # Add parent directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Import modules
-from sentiment.sentiment import get_sentiment
-from keywords.keywords import get_keywords
-from Summary.summarizer import summarize
+from services.sentiment.sentiment import get_sentiment
+from services.keywords.keywords import get_keywords
+from services.summary.summarizer import summarize
 
 app = FastAPI()
 
@@ -42,7 +40,7 @@ def analyze_text(data: dict):
 @app.get("/analyze-from-file")
 def analyze_from_file():
 
-    file_path = "../Data/texts.json"
+    file_path = os.path.join(BASE_DIR, "data", "texts.json")
 
     try:
         with open(file_path, "r") as f:
