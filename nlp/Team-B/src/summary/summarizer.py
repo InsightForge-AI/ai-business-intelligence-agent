@@ -13,14 +13,3 @@ def summarize(text):
     return summary
 
 
-# test run
-if __name__ == "__main__":
-
-    text = """Artificial Intelligence is growing rapidly.
-    It is used in healthcare, education and business.
-    Many companies are investing in AI."""
-
-    result = summarize(text)
-
-    print("Summary:")
-    print(result)

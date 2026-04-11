@@ -25,11 +25,3 @@ def get_sentiment(text):
     return "neutral"
 
 
-# TEST BLOCK
-if __name__ == "__main__":
-
-    text = "This product is excellent"
-
-    result = get_sentiment(text)
-
-    print(result)    

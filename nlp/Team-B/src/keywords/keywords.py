@@ -18,12 +18,3 @@ def get_keywords(text):
 
     return keywords
 
-
-# TEST BLOCK
-if __name__ == "__main__":
-
-    text = "This product is very good and useful"
-
-    result = get_keywords(text)
-
-    print(result)
