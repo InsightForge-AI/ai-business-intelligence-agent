@@ -56,13 +56,6 @@ rag/
 pip install -r requirements.txt
 ```
 
-### Generate FAQ file (run once)
-
-```python
-from rag.Team_D.app.services.chunking import build_faq_file
-build_faq_file()
-```
-
 ---
 
 ## Run the Server
