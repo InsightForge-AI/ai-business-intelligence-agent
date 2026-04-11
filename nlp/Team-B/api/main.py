@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 # Import service modules
-from src.sentiment.sentiment import get_sentiment
-from src.keywords.keywords import get_keywords
-from src.summary.summarizer import summarize
+from src.sentiment import get_sentiment
+from src.keywords import get_keywords
+from src.summarizer import summarize
 
 app = FastAPI()
 

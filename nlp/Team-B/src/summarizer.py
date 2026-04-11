@@ -1,5 +1,11 @@
-from .preprocess import clean_text
-from .utils import split_sentences
+def clean_text(text):
+    text = text.lower()
+    text = text.strip()
+    return text
+
+def split_sentences(text):
+    sentences = text.split(".")
+    return sentences
 
 def summarize(text):
 
