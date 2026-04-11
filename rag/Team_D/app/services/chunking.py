@@ -1,6 +1,6 @@
 # This module is done by Manjula
 
-from app.core.startup import preprocess_data
+from rag.Team_D.app.core.startup import preprocess_data
 import os
 
 def chunk_data(qa_pairs):
@@ -12,7 +12,7 @@ def chunk_data(qa_pairs):
 
 
 def build_faq_file():
-    print("Building FAQ file...")
+    print("📄 Building FAQ file...")
 
     qa_pairs = preprocess_data()
     chunks = chunk_data(qa_pairs)
@@ -27,5 +27,6 @@ def build_faq_file():
         for chunk in chunks:
             f.write(chunk + '\n')
 
-    print("FAQ file built successfully")
+    print("✅ FAQ file created")
+
     return faq_path

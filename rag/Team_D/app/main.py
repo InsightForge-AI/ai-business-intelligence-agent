@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.routes.rag_routes import router
-from app.core.startup import initialize_system
+from rag.Team_D.app.routes.rag_routes import router
+from rag.Team_D.app.core.startup import initialize_system
 
 
 @asynccontextmanager
@@ -12,7 +12,7 @@ async def lifespan(app: FastAPI):
     # Startup
     collection = initialize_system()
 
-    import app.routes.rag_routes as routes
+    import rag.Team_D.app.routes.rag_routes as routes
     routes.collection = collection
 
     yield

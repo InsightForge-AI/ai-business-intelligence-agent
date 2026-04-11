@@ -4,8 +4,8 @@ import pandas as pd
 import re
 import os
 
-from app.services.embedding import get_embeddings
-from app.services.retrieval import create_collection
+from rag.Team_D.app.services.embedding import get_embeddings
+from rag.Team_D.app.services.retrieval import create_collection
 
 
 def clean_text(text):
@@ -53,14 +53,20 @@ def load_faq_data(file_path):
 
 
 def initialize_system():
-    print("Initializing RAG system...")
+    print("🚀 Initializing RAG system...")
 
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
     faq_path = os.path.join(base_dir, 'data', 'faq.txt')
 
+    # ✅ ALWAYS rebuild faq.txt (fresh data)
+    from rag.Team_D.app.services.chunking import build_faq_file
+    faq_path = build_faq_file()
+
+    # Load + embed + store
     docs = load_faq_data(faq_path)
     embeddings = get_embeddings(docs)
     collection = create_collection(docs, embeddings)
 
-    print("RAG system ready")
+    print("✅ RAG system ready")
+
     return collection

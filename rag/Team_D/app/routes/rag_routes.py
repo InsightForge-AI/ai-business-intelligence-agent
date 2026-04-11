@@ -3,8 +3,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.services.retrieval import search
-from app.services.embedding import model
+from rag.Team_D.app.services.retrieval import search
+from rag.Team_D.app.services.embedding import model
 
 router = APIRouter()
 

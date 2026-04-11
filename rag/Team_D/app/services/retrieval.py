@@ -1,4 +1,4 @@
-# This module is done by Rana Kumar
+# This module is done by Rana Kumar and Chandrashekar
 
 import chromadb
 
