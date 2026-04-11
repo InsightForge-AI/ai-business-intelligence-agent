@@ -1,8 +1,3 @@
 fastapi
 uvicorn
 python-multipart
-easyocr
-numpy
-pillow
-torch
-opencv-python
