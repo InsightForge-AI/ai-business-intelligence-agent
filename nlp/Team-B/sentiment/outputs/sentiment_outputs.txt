@@ -1,5 +1,0 @@
-Input: This product is excellent -> Output: positive
-Input: Very slow delivery -> Output: negative
-Input: The service is okay -> Output: neutral
-Input: Amazing quality -> Output: positive
-Input: Worst experience -> Output: negative
