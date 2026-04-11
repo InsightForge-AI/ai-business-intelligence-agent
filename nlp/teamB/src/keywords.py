@@ -17,4 +17,3 @@ def get_keywords(text):
             break
 
     return keywords
-
