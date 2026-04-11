@@ -1,28 +1,23 @@
-import os
-from fastapi import FastAPI, HTTPException
+import os, importlib.util
+from fastapi import FastAPI
 from pydantic import BaseModel
 
-try:
-    from ..src.preprocess import preprocess
-    from ..src.analysis import analyze
-    from ..src.insights import get_insights
-except ImportError:
-    import importlib.util
 
-    def _load(name, path):
-        spec = importlib.util.spec_from_file_location(name, path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        return mod
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
-    _src = os.path.join(os.path.dirname(__file__), "..", "src")
-    preprocess = _load("preprocess", os.path.join(_src, "preprocess.py")).preprocess
-    analyze    = _load("analysis",   os.path.join(_src, "analysis.py")).analyze
-    get_insights = _load("insights", os.path.join(_src, "insights.py")).get_insights
 
-app = FastAPI(title="Sales Analytics API - Team A")
+BASE = os.path.dirname(__file__)
+SRC = os.path.join(BASE, "..", "src")
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "sales_data.csv")
+preprocess = load("p", os.path.join(SRC, "preprocess.py")).preprocess
+analyze = load("a", os.path.join(SRC, "analysis.py")).analyze
+get_insights = load("i", os.path.join(SRC, "insights.py")).get_insights
+
+app = FastAPI()
 
 
 class SalesRequest(BaseModel):
@@ -30,29 +25,20 @@ class SalesRequest(BaseModel):
 
 
 @app.post("/ml/analyze")
-async def ml_analyze(request: SalesRequest):
-    if request.data.lower().strip() != "sales data":
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unknown data source: '{request.data}'. Use: 'sales data'"
-        )
+async def ml_analyze(req: SalesRequest):
+    if req.data.lower().strip() != "sales data":
+        return {"error": f"Unknown data source: '{req.data}'"}
 
-    try:
-        df = preprocess(DATA_PATH)
+    df = preprocess(os.path.join(BASE, "..", "data", "sales_data.csv"))
 
-        if df.empty:
-            raise HTTPException(status_code=400, detail="Dataset is empty after loading.")
+    if df.empty:
+        return {"error": "Dataset is empty"}
 
-        result = analyze(df)
-        result.update(get_insights(result))
-        return result
-
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="sales_data.csv not found.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    res = analyze(df)
+    res.update(get_insights(res))
+    return res
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", reload=True)
