@@ -1,45 +1,26 @@
 import easyocr
-from pathlib import Path
-import json
 
-# Paths
-BASE_DIR = Path(__file__).resolve().parent.parent
-RAW_DIR = BASE_DIR / "data" / "raw"
-OUTPUT_DIR = BASE_DIR / "data" / "processed" / "ocr"
-
-# OCR model
+# 🔥 initialize once (important for performance)
 reader = easyocr.Reader(['en'], gpu=False)
 
+
 def extract_text(image_path):
-    results = reader.readtext(str(image_path))
-    return [text for (_, text, conf) in results if conf > 0.3]
+    """
+    Extract text from image using EasyOCR
+    Returns: list of detected text
+    """
 
-def run():
-    print("📂 Using path:", RAW_DIR)
+    try:
+        results = reader.readtext(str(image_path))
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        # filter text based on confidence
+        texts = []
+        for (_, text, conf) in results:
+            if conf > 0.3:
+                texts.append(text)
 
-    images = list(RAW_DIR.glob("*.png")) + list(RAW_DIR.glob("*.jpg"))
+        # 🔥 limit output (important for API size)
+        return texts[:5]
 
-    if not images:
-        print("❌ No images found")
-        return
-
-    all_results = []
-
-    for img in images:
-        text = extract_text(img)
-        print(img.name, "→", text)
-
-        all_results.append({
-            "image": img.name,
-            "text": text
-        })
-
-    with open(OUTPUT_DIR / "ocr_results.json", "w") as f:
-        json.dump(all_results, f, indent=2)
-
-    print("✅ Done!")
-
-if __name__ == "__main__":
-    run()
+    except Exception as e:
+        return [f"OCR error: {str(e)}"]
