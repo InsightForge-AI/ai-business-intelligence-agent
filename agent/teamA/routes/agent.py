@@ -1,6 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from schemas.models import AnalyzeRequest, AnalyzeResponse
-from services.decision import decide
+
+try:
+    from ..schemas.models import AnalyzeRequest, AnalyzeResponse
+    from ..services.decision import decide
+except ImportError:
+    from schemas.models import AnalyzeRequest, AnalyzeResponse
+    from services.decision import decide
 
 router = APIRouter()
 

@@ -1,5 +1,11 @@
 from fastapi import FastAPI
-from routes.agent import router
+
+# Support both `python -m uvicorn agent.teamA.app:app` from the repo root
+# and direct local execution from inside `agent/teamA`.
+try:
+    from .routes.agent import router
+except ImportError:
+    from routes.agent import router
 
 app = FastAPI(
     title="Agent Team A",

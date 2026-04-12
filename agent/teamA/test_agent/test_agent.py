@@ -3,6 +3,7 @@ Unit tests for Agent Team A - API Contract Compliance
 Tests ensure the agent correctly routes queries to NLP, ML, or CV services
 """
 
+import importlib
 import pytest
 from fastapi.testclient import TestClient
 from pathlib import Path
@@ -155,3 +156,18 @@ class TestAPIContract:
         """Sprint 1: Should not make any API calls - only decide"""
         response = client.post("/agent/analyze", json={"query": "analyze data"})
         assert response.status_code == 200
+
+
+class TestImportCompatibility:
+    """Tests for package-safe imports."""
+
+    def test_package_import_from_repo_root(self):
+        """The app should import as agent.teamA.app from the repo root."""
+        repo_root = Path(__file__).resolve().parents[3]
+        sys.path.insert(0, str(repo_root))
+        try:
+            module = importlib.import_module("agent.teamA.app")
+            assert hasattr(module, "app")
+        finally:
+            sys.path.pop(0)
+            sys.modules.pop("agent.teamA.app", None)
