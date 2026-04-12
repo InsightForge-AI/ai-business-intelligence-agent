@@ -1,11 +1,14 @@
+from pathlib import Path
+import sys
+
 from fastapi import FastAPI
 
-# Support both `python -m uvicorn agent.teamA.app:app` from the repo root
-# and direct local execution from inside `agent/teamA`.
-try:
+# Allow `uvicorn app:app` from inside `agent/teamA` by exposing the repo root.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from agent.teamA.routes.agent import router
+else:
     from .routes.agent import router
-except ImportError:
-    from routes.agent import router
 
 app = FastAPI(
     title="Agent Team A",

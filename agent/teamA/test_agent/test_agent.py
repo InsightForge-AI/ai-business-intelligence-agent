@@ -9,9 +9,9 @@ from fastapi.testclient import TestClient
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from app import app
+from agent.teamA.app import app
 
 
 client = TestClient(app)

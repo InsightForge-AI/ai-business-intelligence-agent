@@ -1,8 +1,4 @@
-# importing keywords for decision making
-try:
-    from ..config import ROUTING_KEYWORDS
-except ImportError:
-    from config import ROUTING_KEYWORDS
+from ..config import ROUTING_KEYWORDS
 
 def decide(query: str) -> str:
     q = query.lower()
