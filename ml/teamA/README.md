@@ -8,7 +8,7 @@ A lightweight sales analytics service that reads sales data, processes it, and r
 
 ```
 ml/
-└── teama/
+└── teamA/
     ├── README.md
     ├── requirements.txt
     ├── api/
