@@ -1,2 +1,4 @@
 venv
-requirements.txt
+__pychache__/
+*pyc
+data/

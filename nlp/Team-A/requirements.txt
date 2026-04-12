@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+vaderSentiment
+pandas
+transformers
+torch
+python-multipart

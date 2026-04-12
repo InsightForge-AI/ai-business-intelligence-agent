@@ -22,3 +22,11 @@ async def analyze(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     return analyze_image(file_path)
+from fastapi import FastAPI, UploadFile, File
+from src.image_analysis import analyze_image
+
+app = FastAPI()
+
+@app.post("/cv/analyze")
+async def analyze(file: UploadFile = File(...)):
+    return analyze_image(file)
