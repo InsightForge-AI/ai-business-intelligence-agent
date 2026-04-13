@@ -17,7 +17,7 @@ echo "Starting AI Business Intelligence system..."
 (cd rag && python3 -m uvicorn teamC.api.main:app --port 8003 &)
 
 # CV
-(cd cv && python3 -m uvicorn teamA.api.main:app --port 8004 &)
+(cd cv && python3 -m uvicorn teamB.api.main:app --port 8004 &)
 
 # Agent
 (cd agent && python3 -m uvicorn teamA.app:app --port 8005 &)
