@@ -1,1 +1,1 @@
-# services package
+"""Service helpers for Agent Team A."""

@@ -1,1 +1,1 @@
-# schemas package
+"""Schema models for Agent Team A."""

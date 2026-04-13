@@ -1,5 +1,4 @@
-#importing Keywords for decision making
-from config import ROUTING_KEYWORDS
+from ..config import ROUTING_KEYWORDS
 
 def decide(query: str) -> str:
     q = query.lower()
