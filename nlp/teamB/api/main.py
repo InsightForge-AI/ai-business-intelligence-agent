@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 # Import service modules
-from src.sentiment import get_sentiment
-from src.keywords import get_keywords
-from src.summarizer import summarize
+from teamB.src.sentiment import get_sentiment
+from teamB.src.keywords import get_keywords
+from teamB.src.summarizer import summarize
 
 app = FastAPI()
 
