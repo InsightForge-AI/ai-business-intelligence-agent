@@ -22,10 +22,10 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 def check_image(file: UploadFile):
     
     if file is None:
-        return "No image provided"
+        return "not found"
     
-    if file.filename == "":
-        return "Empty file"
+    if file.filename == "" or file.filename is None:
+        return "not found"
     
     if not file.filename.lower().endswith(("jpg", "jpeg", "png")):
         return "Invalid format"
@@ -35,14 +35,15 @@ def check_image(file: UploadFile):
 
 # 🚀 API Endpoint
 @app.post("/cv/analyze")
-async def analyze(file: UploadFile = File(...)):
+async def analyze(file: UploadFile = File(None)):
     
     # ✅ Step 1: Validation
     valid = check_image(file)
     if valid != "valid":
         return {
             "status": "error",
-            "message": valid
+            "message": valid,
+            "file_name": file.filename if file else None
         }
 
     file_path = UPLOAD_DIR / file.filename
@@ -52,6 +53,14 @@ async def analyze(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        # ✅ NEW: Empty file check 🔥
+        if file_path.stat().st_size == 0:
+            return {
+                "status": "error",
+                "message": "Empty file",
+                "file_name": file.filename
+            }
+
         # ✅ Step 3: Corrupt image check
         try:
             img = Image.open(file_path)
@@ -59,20 +68,31 @@ async def analyze(file: UploadFile = File(...)):
         except:
             return {
                 "status": "error",
-                "message": "Corrupt image"
+                "message": "Corrupt image",
+                "file_name": file.filename
             }
 
         # ✅ Step 4: Call existing logic
         result = analyze_image(file_path)
 
-        # ✅ Step 5: Success response
+        # ✅ Step 5: Handle empty result
+        if not result:
+            return {
+                "status": "error",
+                "message": "not found",
+                "file_name": file.filename
+            }
+
+        # ✅ Step 6: Success response
         return {
             "status": "success",
+            "file_name": file.filename,
             "result": result
         }
 
     except Exception:
         return {
             "status": "error",
-            "message": "Processing failed"
+            "message": "Processing failed",
+            "file_name": file.filename if file else None
         }
