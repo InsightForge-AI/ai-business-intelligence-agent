@@ -23,7 +23,27 @@ def home():
 @app.post("/rag/query")
 def rag_query(request: QueryRequest):
 
-    results = simple_search(request.query)
+    query = request.query
+
+    # Case 1 — empty query
+    if not query or not query.strip():
+        return {
+            "query": request.query,
+            "total_results": 0,
+            "message": "empty query",
+            "results": []
+        }
+
+    results = simple_search(query)
+
+    # Case 2 — no match
+    if len(results) == 0:
+        return {
+            "query": request.query,
+            "total_results": 0,
+            "message": "not found",
+            "results": []
+        }
 
     return {
         "query": request.query,
