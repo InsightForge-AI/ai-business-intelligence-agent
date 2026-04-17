@@ -1,7 +1,3 @@
-from src.detect import detect_objects
-from src.ocr import extract_text
-from src.describe import describe_image
-
 def analyze_image(image_path):
     return {
         "objects": detect_objects(image_path),
