@@ -1,5 +1,14 @@
+from pathlib import Path
+import sys
+
 from fastapi import FastAPI
-from routes.agent import router
+
+# Allow `uvicorn app:app` from inside `agent/teamA` by exposing the repo root.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from agent.teamA.routes.agent import router
+else:
+    from .routes.agent import router
 
 app = FastAPI(
     title="Agent Team A",

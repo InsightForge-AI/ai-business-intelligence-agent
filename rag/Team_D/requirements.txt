@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+
+sentence-transformers
+chromadb
+
+pandas
+numpy
+
+requests
