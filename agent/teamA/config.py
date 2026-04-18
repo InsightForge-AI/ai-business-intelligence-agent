@@ -1,5 +1,5 @@
 ROUTING_KEYWORDS = {
-    "nlp": ["review", "feedback", "sentiment", "comment", "text"],
+    "nlp": ["review","reviews" "feedback", "sentiment", "comment", "text"],
     "ml": ["sales", "revenue", "trend", "data", "profit", "analytics"],
     "cv": ["image", "photo", "picture", "object", "visual"],
     "rag": ["document","policy","report","search","retrieve","knowledge","delivery","delay","customer","complaint","marketing","campaign"]
