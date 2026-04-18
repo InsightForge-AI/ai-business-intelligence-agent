@@ -1,20 +1,32 @@
+import re
+
+def clean_text(text):
+    if not text:
+        return ""
+    text = text.lower()
+    text = re.sub(r'[^a-z\s]', '', text)  # remove special chars
+    return text.strip()
+
 def get_sentiment(text):
-    if not text or len(text.strip()) == 0:
+    text = clean_text(text)
+
+    if not text:
         return "neutral"
 
-    text = text.lower()
+    words = text.split()
 
-    positive_words = ["good", "great", "excellent", "happy", "love", "awesome"]
-    negative_words = ["bad", "terrible", "sad", "hate", "worst", "poor"]
+    positive_words = {"good", "great", "excellent", "happy", "love", "awesome"}
+    negative_words = {"bad", "terrible", "sad", "hate", "worst", "poor"}
 
-    # Check for positive words
-    for word in positive_words:
-        if word in text:
-            return "positive"
+    pos_count = sum(1 for word in words if word in positive_words)
+    neg_count = sum(1 for word in words if word in negative_words)
 
-    # Check for negative words
-    for word in negative_words:
-        if word in text:
-            return "negative"
-
-    return "neutral"
+    # Mixed sentiment handling
+    if pos_count > 0 and neg_count > 0:
+        return "mixed"
+    elif pos_count > neg_count:
+        return "positive"
+    elif neg_count > pos_count:
+        return "negative"
+    else:
+        return "neutral"
