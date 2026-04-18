@@ -1,3 +1,9 @@
+def analyze_image(image_path):
+    return {
+        "objects": detect_objects(image_path),
+        "extracted_text": extract_text(image_path),
+        "description": describe_image(image_path)
+    }
 def analyze_image(image):
     return {
         "objects": ["box"],

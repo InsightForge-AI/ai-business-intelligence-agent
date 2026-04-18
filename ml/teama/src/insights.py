@@ -1,5 +1,4 @@
 def get_insights(result):
-    # Handle error or invalid states first
     if result.get("trend") in ["invalid", "no data"]:
         return {"insights": f"Analysis halted: {result.get('trend')}."}
 
