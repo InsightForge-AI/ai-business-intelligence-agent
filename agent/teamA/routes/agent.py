@@ -7,6 +7,11 @@ router = APIRouter()
 
 @router.post("/agent/analyze", response_model=AnalyzeResponse)
 def agent_analyze(request: AnalyzeRequest) -> AnalyzeResponse:
-    if not request.query.strip():
+    if not request.query or not request.query.strip():
         raise HTTPException(status_code=400, detail="Field 'query' must not be empty")
-    return AnalyzeResponse(action=decide(request.query))
+
+    try:
+        return AnalyzeResponse(action=decide(request.query))
+    except Exception:
+        # Sprint 3 requirement: never crash on valid input, use NLP as safe fallback.
+        return AnalyzeResponse(action="nlp")

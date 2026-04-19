@@ -60,6 +60,18 @@ class TestAgentAnalyzeNLP:
         assert response.status_code == 200
         assert response.json()["action"] == "nlp"
 
+    def test_route_noisy_positive_text_to_nlp(self):
+        """Uppercase + symbols should still route safely to NLP"""
+        response = client.post("/agent/analyze", json={"query": "GOOD product!!!"})
+        assert response.status_code == 200
+        assert response.json()["action"] == "nlp"
+
+    def test_route_mixed_sentiment_text_to_nlp(self):
+        """Mixed sentiment free text should fall back to NLP safely"""
+        response = client.post("/agent/analyze", json={"query": "good but late delivery"})
+        assert response.status_code == 200
+        assert response.json()["action"] == "nlp"
+
 
 class TestAgentAnalyzeML:
     """Tests for ML routing"""
@@ -111,20 +123,43 @@ class TestAgentAnalyzeCV:
         assert response.json()["action"] == "cv"
 
 
-class TestAgentAnalyzeUnknown:
-    """Tests for unknown routing"""
+class TestAgentAnalyzeRAG:
+    """Tests for RAG routing"""
 
-    def test_route_unknown_query(self):
-        """Query with no matching keywords should route to unknown"""
+    def test_route_sales_drop_question_to_rag(self):
+        """Root-cause style search query should route to RAG"""
+        response = client.post("/agent/analyze", json={"query": "why sales dropped last month"})
+        assert response.status_code == 200
+        assert response.json()["action"] == "rag"
+
+
+class TestAgentAnalyzeFallbacks:
+    """Tests for Sprint 3 fallback routing"""
+
+    def test_route_unknown_query_to_nlp(self):
+        """Unknown valid query should fall back to NLP"""
         response = client.post("/agent/analyze", json={"query": "hello world"})
         assert response.status_code == 200
-        assert response.json()["action"] == "unknown"
+        assert response.json()["action"] == "nlp"
 
-    def test_route_random_query_to_unknown(self):
-        """Random query should route to unknown"""
+    def test_route_random_query_to_nlp(self):
+        """Random text should fall back to NLP"""
         response = client.post("/agent/analyze", json={"query": "what is the weather"})
         assert response.status_code == 200
-        assert response.json()["action"] == "unknown"
+        assert response.json()["action"] == "nlp"
+
+    def test_multi_intent_query_falls_back_to_nlp(self):
+        """Close multi-intent scores should resolve safely to NLP"""
+        response = client.post("/agent/analyze", json={"query": "image and sales data"})
+        assert response.status_code == 200
+        assert response.json()["action"] == "nlp"
+
+    def test_very_long_query_returns_safe_response(self):
+        """Very long text should not crash and should keep the API contract"""
+        response = client.post("/agent/analyze", json={"query": "x" * 5000})
+        assert response.status_code == 200
+        assert set(response.json().keys()) == {"action"}
+        assert response.json()["action"] == "nlp"
 
 
 class TestAgentAnalyzeErrors:
@@ -133,6 +168,11 @@ class TestAgentAnalyzeErrors:
     def test_empty_query_returns_error(self):
         """Empty query should return 400 error"""
         response = client.post("/agent/analyze", json={"query": ""})
+        assert response.status_code == 400
+
+    def test_spaces_only_query_returns_error(self):
+        """Whitespace-only query should return 400 error"""
+        response = client.post("/agent/analyze", json={"query": "   "})
         assert response.status_code == 400
 
     def test_response_has_action_field(self):
@@ -150,7 +190,7 @@ class TestAPIContract:
         response = client.post("/agent/analyze", json={"query": "analyze reviews"})
         data = response.json()
         assert set(data.keys()) == {"action"}
-        assert data["action"] in ["nlp", "ml", "cv", "unknown"]
+        assert data["action"] in ["nlp", "ml", "cv", "rag"]
 
     def test_no_api_calls_made(self):
         """Sprint 1: Should not make any API calls - only decide"""
