@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from rag.Team_D.app.services.retrieval import search
 from rag.Team_D.app.services.embedding import model
+from rag.Team_D.app.core.startup import clean_text
 
 router = APIRouter()
 
@@ -28,5 +29,5 @@ def ask_question(request: QueryRequest):
     - Long queries
     - No matches
     """
-    results = search(request.query, model, collection)
-    return results
+    cleaned_query = clean_text(request.query)
+    return search(cleaned_query, model, collection)
