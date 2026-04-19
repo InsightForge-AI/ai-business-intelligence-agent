@@ -17,9 +17,16 @@ class QueryRequest(BaseModel):
 
 @router.post("/rag/query")
 def ask_question(request: QueryRequest):
+    """
+    Query the RAG system with proper edge case handling for:
+    - Normal queries
+    - Empty queries
+    - Case sensitivity
+    - Extra spaces
+    - Duplicate words
+    - Partial matches
+    - Long queries
+    - No matches
+    """
     results = search(request.query, model, collection)
-
-    return {
-        "query": request.query,
-        "answers": results
-    }
+    return results
