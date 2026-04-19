@@ -15,7 +15,6 @@ ROUTING_KEYWORDS = {
         "delivery",
         "complaint",
         "complaints",
-        "product",
     ],
     "ml": [
         "sales",
@@ -32,12 +31,19 @@ ROUTING_KEYWORDS = {
     ],
     "cv": [
         "image",
+        "images",
         "photo",
+        "photos",
         "picture",
+        "pictures",
         "object",
+        "objects",
         "visual",
+        "visuals",
         "scan",
+        "scans",
         "screenshot",
+        "screenshots",
     ],
     "rag": [
         "document",
