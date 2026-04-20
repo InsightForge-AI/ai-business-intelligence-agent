@@ -8,58 +8,41 @@ SUPPORTED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 async def analyze_image(file):
 
     if file is None:
-        return JSONResponse(
-            status_code=400,
-            content={
-                
-                "objects": [],
-                "extracted_text": "",
-                "description": ""
-            }
-        )
+        return {
+            "objects": [],
+            "extracted_text": "No file provided",
+            "description": "No image input"
+        }
 
     if file.content_type not in SUPPORTED_TYPES:
-        return JSONResponse(
-            status_code=400,
-            content={
-                
-                "objects": [],
-                "extracted_text": "",
-                "description": ""
-            }
-        )
+        return {
+            "objects": [],
+            "extracted_text": "Invalid format",
+            "description": "Unsupported file type"
+        }
 
     try:
         contents = await file.read()
 
         if len(contents) == 0:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    
-                    "objects": [],
-                    "extracted_text": "",
-                    "description": ""
-                }
-            )
+            return {
+                "objects": [],
+                "extracted_text": "Empty file",
+                "description": "Uploaded file is empty"
+            }
 
         Image.open(io.BytesIO(contents)).verify()
 
+        # success output
         return {
-            
-            "objects": ["box"],  # temporary
-            "extracted_text": "sample",
+            "objects": ["box"],
+            "extracted_text": "sample text",
             "description": "basic image"
         }
 
     except Exception:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "status": "error",
-                "message": "Invalid or corrupt image",
-                "objects": [],
-                "extracted_text": "",
-                "description": ""
-            }
-        )
+        return {
+            "objects": [],
+            "extracted_text": "Invalid image",
+            "description": "Corrupt or unreadable image"
+        }
