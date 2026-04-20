@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from src.sentiment import get_sentiment
-from src.summary import summarize_text
-from src.keywords import extract_keywords
+from nlp.teamC.src.sentiment import get_sentiment
+from nlp.teamC.src.summary import summarize_text
+from nlp.teamC.src.keywords import extract_keywords
 
 app = FastAPI()
 

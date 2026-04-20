@@ -1,4 +1,4 @@
-def get_keywords(text):
+def extract_keywords(text):
 
     # Preprocessing
     if text is None:

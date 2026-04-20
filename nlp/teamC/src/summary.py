@@ -16,7 +16,7 @@ def preprocess(text):
     return cleaned
 
 
-def summarize(text):
+def summarize_text(text):
 
     if not text or text.strip() == "":
         return "No text provided"
