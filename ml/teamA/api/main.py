@@ -18,11 +18,13 @@ get_insights = load("i", os.path.join(SRC, "insights.py")).get_insights
 app = FastAPI()
 
 class SalesRequest(BaseModel):
-    data: str
+    data: str # Reverted to string
 
 @app.post("/ml/analyze")
 def ml_analyze(req: SalesRequest):
-    df = preprocess(os.path.join(BASE, "..", "data", "sales_data.csv"))
+    # This path points to the actual CSV file in your data folder
+    filepath = os.path.join(BASE, "..", "data", "sales_data.csv")
+    df = preprocess(filepath)
     res = analyze(df)
     res.update(get_insights(res))
     return res
