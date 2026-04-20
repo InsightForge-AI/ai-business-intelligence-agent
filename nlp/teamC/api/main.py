@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 
 from nlp.teamC.src.sentiment import get_sentiment
@@ -7,22 +7,13 @@ from nlp.teamC.src.keywords import extract_keywords
 
 app = FastAPI()
 
-
 class TextRequest(BaseModel):
     text: str
 
 
-@app.get("/")
-def home():
-    return {"message": "API is running"}
-
-
-@app.post("/nlp/analyse")
+@app.post("/nlp/analyze")
 def analyze(data: TextRequest):
-    text = data.text
-
-    if not text or not text.strip():
-        raise HTTPException(status_code=400, detail="Text cannot be empty")
+    text = data.text.strip()
 
     sentiment = get_sentiment(text)
     summary = summarize_text(text)
