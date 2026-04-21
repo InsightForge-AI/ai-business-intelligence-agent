@@ -15,12 +15,30 @@ def preprocess(text):
 
     return cleaned
 
+import re
+
+
+def preprocess(text):
+
+    if not text or text.strip() == "":
+        return None
+
+    cleaned = text.lower()
+
+    # remove symbols except dot
+    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
+
+    cleaned = " ".join(cleaned.split())
+
+    return cleaned
+
 
 def summarize(text):
 
     if not text or text.strip() == "":
         return "No text provided"
 
+    # Clean original text
     clean_original = re.sub(
         r'[^a-zA-Z0-9\s\.]',
         ' ',
@@ -29,7 +47,7 @@ def summarize(text):
 
     clean_original = " ".join(clean_original.split())
 
-    # Keep cleaned original sentences
+    # Split original sentences
     original_sentences = re.split(
         r'\.+\s*',
         clean_original
@@ -40,19 +58,25 @@ def summarize(text):
         if s.strip()
     ]
 
-
     cleaned_text = preprocess(text)
 
     if not cleaned_text:
         return "No text provided"
 
-    cleaned_sentences = cleaned_text.split('.')
+    # Use SAME splitting method
+    cleaned_sentences = re.split(
+        r'\.+\s*',
+        cleaned_text
+    )
+
     cleaned_sentences = [
-        s.strip() for s in cleaned_sentences if s.strip()
+        s.strip() for s in cleaned_sentences
+        if s.strip()
     ]
 
     total_sentences = len(original_sentences)
 
+    # If only one sentence
     if total_sentences == 1:
         return original_sentences[0] + "."
 
@@ -100,7 +124,7 @@ def summarize(text):
             if word in word_freq:
                 score += word_freq[word]
 
-        # Always give slight importance to first sentence
+        # Give slight importance to first sentence
         if i == 0:
             score += 2
 
@@ -116,9 +140,11 @@ def summarize(text):
     # Keep original order
     top_indexes = sorted(top_indexes)
 
+    # Safe indexing fix
     selected_sentences = [
         original_sentences[i]
         for i in top_indexes
+        if i < len(original_sentences)
     ]
 
     return ". ".join(selected_sentences) + "."
