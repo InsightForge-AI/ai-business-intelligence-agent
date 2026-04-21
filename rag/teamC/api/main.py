@@ -25,28 +25,25 @@ def rag_query(request: QueryRequest):
 
     query = request.query
 
-    # Case 1 — empty query
     if not query or not query.strip():
         return {
-            "query": request.query,
+            "content": [],
             "total_results": 0,
-            "message": "empty query",
-            "results": []
+            "message": "empty query"
         }
 
     results = simple_search(query)
 
-    # Case 2 — no match
     if len(results) == 0:
         return {
-            "query": request.query,
+            "query": query,
+            "content": [],
             "total_results": 0,
-            "message": "not found",
-            "results": []
+            "message": "not found"
         }
 
     return {
-        "query": request.query,
-        "total_results": len(results),
-        "results": results
+        "query": query,
+        "content": [r["text"] for r in results],
+        "total_results": len(results)
     }
