@@ -18,3 +18,5 @@ def summarize_text(text):
         clean_text += "."
 
     return clean_text
+
+    print('raju')
