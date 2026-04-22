@@ -55,17 +55,13 @@ def load_faq_data(file_path):
 def initialize_system():
     print("🚀 Initializing RAG system...")
 
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
-    faq_path = os.path.join(base_dir, 'data', 'faq.txt')
+    qa_pairs = preprocess_data()
+    questions = [qa['question'] for qa in qa_pairs]
+    answers = [qa['answer'] for qa in qa_pairs]
 
-    # ✅ ALWAYS rebuild faq.txt (fresh data)
-    from rag.Team_D.app.services.chunking import build_faq_file
-    faq_path = build_faq_file()
-
-    # Load + embed + store
-    docs = load_faq_data(faq_path)
-    embeddings = get_embeddings(docs)
-    collection = create_collection(docs, embeddings)
+    embeddings = get_embeddings(questions)
+    metadatas = [{"answer": ans} for ans in answers]
+    collection = create_collection(questions, embeddings, metadatas)
 
     print("✅ RAG system ready")
 
