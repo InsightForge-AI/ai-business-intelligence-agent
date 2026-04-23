@@ -83,7 +83,7 @@ section[data-testid="stSidebar"] button:hover{
 /* header */
 .top-bar{
     position:fixed;
-    top:60;
+    top:0;
     left:0;
     width:100%;
     height:60px;
