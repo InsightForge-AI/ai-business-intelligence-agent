@@ -62,9 +62,9 @@ try:
 
     # FRONTEND (🔥 FIX HERE)
     start_service(
-        "FRONTEND",
-        [PYTHON, "-m", "streamlit", "run", "app.py"],
-        os.path.join(BASE_DIR, "frontend")
+    "FRONTEND",
+    ["open", os.path.join("webpage", "landing", "index.html")],
+    os.path.join(BASE_DIR, "frontend")
     )
 
     print("\n✅ ALL SERVICES STARTED\n")
