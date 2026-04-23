@@ -2,6 +2,7 @@ import subprocess
 import sys
 import os
 import time
+import webbrowser
 
 BASE_DIR = os.getcwd()
 PYTHON = sys.executable  # 🔥 ensures correct environment
@@ -60,12 +61,18 @@ try:
         os.path.join(BASE_DIR, "backend")
     )
 
-    # FRONTEND (🔥 FIX HERE)
+    # FRONTEND SERVER
     start_service(
-    "FRONTEND",
-    ["open", os.path.join("webpage", "landing", "index.html")],
-    os.path.join(BASE_DIR, "frontend")
+        "FRONTEND",
+        [PYTHON, "-m", "http.server", "3000"],
+        os.path.join(BASE_DIR, "frontend", "webpage")
     )
+
+    # Give server time to start
+    time.sleep(2)
+
+    # Open browser (cross-platform)
+    webbrowser.open("http://localhost:3000/landing")
 
     print("\n✅ ALL SERVICES STARTED\n")
 
