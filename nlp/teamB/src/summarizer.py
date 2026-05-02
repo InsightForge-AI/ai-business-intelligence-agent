@@ -17,6 +17,23 @@ def preprocess(text):
 
     return cleaned
 
+import re
+
+
+def preprocess(text):
+
+    if not text or text.strip() == "":
+        return None
+
+    cleaned = text.lower()
+
+    # remove symbols except dot
+    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
+
+    cleaned = " ".join(cleaned.split())
+
+    return cleaned
+
 
 def summarize(text):
 
@@ -135,7 +152,6 @@ def summarize(text):
     return ". ".join(selected_sentences) + "."
 
 
-
 def smart_summary(text):
 
     basic_summary = summarize(text)
@@ -152,7 +168,6 @@ Text:
 
 Initial summary:
 {basic_summary}
-
 """
 
     llm_result = ask_llm(prompt)
