@@ -1,4 +1,5 @@
 import re
+from teamB.src.llm_enhancer import ask_llm
 
 
 def preprocess_text(text):
@@ -51,4 +52,43 @@ def get_sentiment(text):
         return "negative"
     else:
         return "neutral"
+    
+#LLM Enhancement 
 
+def smart_sentiment(text):
+
+    basic_sentiment = get_sentiment(text)
+
+    prompt = f"""
+    You are a sentiment classifier.
+
+    Text:
+    \"\"\"{text}\"\"\"
+
+    Initial prediction:
+    {basic_sentiment}
+
+   Check if the prediction is correct.
+
+    Return ONLY one word from:
+    positive, negative, neutral, mixed.
+    No explanation.
+    """
+
+    llm_result = ask_llm(prompt)
+
+    if llm_result:
+
+        llm_result = llm_result.strip().lower()
+
+        allowed = ["positive","negative","neutral","mixed"]
+
+        if llm_result in allowed:
+
+            # Trust rule-based if already confident
+            if basic_sentiment in ["positive","negative","mixed"]:
+                return basic_sentiment
+
+            return llm_result
+
+    return basic_sentiment

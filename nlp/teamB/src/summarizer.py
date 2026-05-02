@@ -1,19 +1,4 @@
-import re
-
-
-def preprocess(text):
-
-    if not text or text.strip() == "":
-        return None
-
-    cleaned = text.lower()
-
-    # remove symbols except dot
-    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
-
-    cleaned = " ".join(cleaned.split())
-
-    return cleaned
+from teamB.src.llm_enhancer import ask_llm
 
 import re
 
@@ -148,3 +133,31 @@ def summarize(text):
     ]
 
     return ". ".join(selected_sentences) + "."
+
+
+
+def smart_summary(text):
+
+    basic_summary = summarize(text)
+
+    prompt = f"""
+You are a text summarization assistant.
+Rules:
+- Return only summary text
+- No Labels
+- No explanations
+
+Text:
+\"\"\"{text}\"\"\"
+
+Initial summary:
+{basic_summary}
+
+"""
+
+    llm_result = ask_llm(prompt)
+
+    if llm_result:
+        return llm_result
+
+    return basic_summary
