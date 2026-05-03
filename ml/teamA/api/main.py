@@ -1,5 +1,4 @@
 import os, importlib.util
-import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Union
@@ -11,29 +10,31 @@ def load(name, path):
     return mod
 
 BASE = os.path.dirname(__file__)
-SRC = os.path.join(BASE, "..", "src")
+SRC  = os.path.join(BASE, "..", "src")
+LLM  = os.path.join(BASE, "..", "llm")
 
-preprocess = load("p", os.path.join(SRC, "preprocess.py")).preprocess
-analyze = load("a", os.path.join(SRC, "analysis.py")).analyze
+preprocess   = load("p", os.path.join(SRC, "preprocess.py")).preprocess
+analyze      = load("a", os.path.join(SRC, "analysis.py")).analyze
 get_insights = load("i", os.path.join(SRC, "insights.py")).get_insights
+call_llm     = load("l", os.path.join(LLM, "llm.py")).call_llm
 
 app = FastAPI()
 
 class SalesRequest(BaseModel):
-    data: Union[str, dict[str, float]]
+    data: Union[str, dict, list]
 
 @app.post("/ml/analyze")
 def ml_analyze(req: SalesRequest):
-    # Option 1: User sends "sales data" (String)
-    if isinstance(req.data, str):
+    if isinstance(req.data, str) and not req.data.endswith(".csv"):
         filepath = os.path.join(BASE, "..", "data", "sales_data.csv")
-        df = preprocess(filepath)
-    
+        df, col_map = preprocess(filepath)
     else:
-        df = pd.DataFrame(list(req.data.items()), columns=["product", "total_sales"])
+        df, col_map = preprocess(req.data)
 
-    res = analyze(df)
-    res.update(get_insights(res))
+    res = analyze(df, col_map)
+    res.update(get_insights(res, call_llm=call_llm))
+    res.pop("rankings", None)
+    res["total_sales"] = res.pop("total_sales_formatted", f"₹{res['total_sales']:,}")
     return res
 
 if __name__ == "__main__":
