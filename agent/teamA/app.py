@@ -11,9 +11,9 @@ else:
     from .routes.agent import router
 
 app = FastAPI(
-    title="Agent Team A",
-    description="Routing agent for the AI Business Intelligence system",
-    version="1.0.0"
+    title="Agent Team A Smart Routing",
+    description="Sprint 4 smart routing agent for the AI Business Intelligence system",
+    version="2.0.0"
 )
 
 app.include_router(router)
@@ -21,11 +21,12 @@ app.include_router(router)
 @app.get("/")
 def health_check():
     return {
-        "status": "Agent Team A is running",
-        "sprint": 1,
-        "endpoint": "POST/agent/analyze"
+        "status": "Agent Team A Sprint 4 is running",
+        "sprint": 4,
+        "version": "2.0.0",
+        "endpoint": "POST /agent/analyze"
     }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="127.0.0.1", port=8005)
