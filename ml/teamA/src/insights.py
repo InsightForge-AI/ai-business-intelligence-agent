@@ -1,37 +1,55 @@
-def _rule_based(result):
-    total    = result.get("total_sales_formatted") or f"₹{result.get('total_sales', 0):,}"
-    product  = result.get("top_product") or "N/A"
-    trend    = result.get("trend", "stable")
-    rankings = result.get("rankings", [])
-
-    parts = [f"Total sales is {total}. {product} is the top performing product."]
-    if rankings:
-        breakdown = ", ".join([f"{r['product']} {r['share']}%" for r in rankings])
-        parts.append(f"Product breakdown: {breakdown}.")
-    if trend == "increasing":
-        parts.append("Sales are trending upward. Consider scaling top performers.")
-    elif trend == "decreasing":
-        parts.append("Sales are declining. Review pricing or marketing strategy.")
-    else:
-        parts.append("Sales are stable. Explore new markets to drive growth.")
-    return " ".join(parts)
+import json
+import re
 
 
-def get_insights(result, call_llm=None):
-    if call_llm:
-        rankings = result.get("rankings", [])
-        breakdown = ", ".join([f"{r['product']} ({r['share']}% of sales)" for r in rankings])
-        total = result.get("total_sales_formatted") or f"₹{result.get('total_sales', 0):,}"
-        prompt = f"""You are a business analyst. Write exactly 2-3 sentences as a single plain paragraph. No bullet points, no dashes, no newlines, no markdown, no parenthetical notes. Cover: what the numbers show, what the trend means for the business, and one specific recommendation.
+def build_prompt(query: str) -> str:
+    return f"""You are a Senior Business Intelligence Consultant specialized in the Indian Retail Market.
+The user is asking for analysis on: "{query}"
 
-Data:
-- Total sales: {total}
-- Top product: {result.get('top_product')}
-- Trend: {result.get('trend')}
-- Product breakdown: {breakdown}
+Task: Generate a realistic simulated analysis based on Indian market benchmarks.
 
-3 sentences, plain paragraph, no extra commentary."""
-        response = call_llm(prompt)
-        if response:
-            return {"insights": response}
-    return {"insights": _rule_based(result)}
+The JSON must have exactly these keys:
+- total_sales: a string in human-readable Indian terms (e.g., '₹1.5 Lakh Cr', '₹850 Cr', or '₹40 Lakh')
+- top_product: a specific product model or sub-category
+- trend: one of "increasing", "decreasing", or "stable"
+- insights: exactly 3 short, punchy sentences.
+
+Constraint: All monetary values in Indian Rupees (₹). Respond with raw JSON only. Do not exceed 60 words for insights."""
+
+
+def get_insights(query: str, call_llm) -> dict:
+    res = {
+        "total_sales": None,
+        "top_product": None,
+        "trend": None,
+        "error": None,
+        "insights": None
+    }
+
+    response = call_llm(build_prompt(query))
+
+    if not response:
+        res["error"] = "LLM unavailable or connection timeout"
+        return res
+
+    try:
+        clean_response = re.sub(r"<think>.*?</think>", "", response, flags=re.DOTALL).strip()
+        match = re.search(r"\{.*\}", clean_response, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+            res["total_sales"] = data.get("total_sales", "₹0")
+            res["top_product"] = data.get("top_product")
+            res["trend"]       = data.get("trend")
+            res["error"]       = None
+
+            raw_insights = data.get("insights", "")
+            if isinstance(raw_insights, list):
+                raw_insights = " ".join(raw_insights)
+            sentences = re.split(r'(?<=[.!?]) +', str(raw_insights).strip())
+            res["insights"] = " ".join(sentences[:3])
+        else:
+            res["error"] = "Could not parse LLM JSON response"
+    except Exception as e:
+        res["error"] = f"Internal processing error: {str(e)}"
+
+    return res
