@@ -1,3 +1,5 @@
+from teamB.src.llm_enhancer import ask_llm
+
 def get_keywords(text):
 
     # Preprocessing
@@ -46,3 +48,53 @@ def get_keywords(text):
             return ["No keywords found"]
 
     return keywords
+
+#LLM Enhancement
+
+def smart_keywords(text):
+
+    basic_keywords = get_keywords(text)
+
+    prompt = f"""
+    You are a keyword extraction assistant.
+
+    Text:
+    \"\"\"{text}\"\"\"
+
+    Initial keywords:
+    {basic_keywords}
+
+    Rules:
+    - Use ONLY keywords from the initial keywords list
+    - Do NOT add new keywords
+    - Remove only clearly duplicate or meaningless words
+    - Keep meaningful descriptive words
+    - Keep subject and feature words
+    - Keep topic words and object names
+    - Return keywords as a comma-separated list.
+    - No sentences.No explanations
+    """
+
+    llm_result = ask_llm(prompt)
+
+    if llm_result:
+
+        words = llm_result.split(",")
+
+        cleaned = [
+            w.strip().lower()
+            for w in words
+        ]
+
+        filtered = [
+            w for w in cleaned
+            if w in basic_keywords
+        ]
+
+        # Safety fallback
+        if len(filtered) < 2:
+            return basic_keywords
+
+        return filtered
+
+    return basic_keywords

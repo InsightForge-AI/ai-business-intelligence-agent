@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import concurrent.futures
 import logging
+import time
 
 from app.services.cv_service import run_cv
 from app.services.agent_service import run_agent
@@ -12,9 +13,6 @@ from app.services.rag_service import run_rag
 
 router = APIRouter()
 
-
-# logging setup
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -37,9 +35,9 @@ TIMEOUT = 5
 
 def execute_with_timeout(service, query, module):
 
-    try:
+    start_time = time.time()
 
-        logger.info(f"Running module: {module}")
+    try:
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
@@ -47,14 +45,19 @@ def execute_with_timeout(service, query, module):
 
             result = future.result(timeout=TIMEOUT)
 
-            logger.info(f"{module} completed successfully")
 
-            return result
+        execution_time = round(time.time() - start_time, 3)
+
+        logger.info(f"{module} executed in {execution_time}s")
+
+        return result
 
 
     except concurrent.futures.TimeoutError:
 
-        logger.error(f"{module} timeout")
+        execution_time = round(time.time() - start_time, 3)
+
+        logger.error(f"{module} timeout after {execution_time}s")
 
         return {
 
@@ -65,7 +68,9 @@ def execute_with_timeout(service, query, module):
 
     except Exception as e:
 
-        logger.error(f"{module} failed: {str(e)}")
+        execution_time = round(time.time() - start_time, 3)
+
+        logger.error(f"{module} failed after {execution_time}s | {str(e)}")
 
         return {
 
@@ -82,16 +87,13 @@ def analyze(request: AnalyzeRequest):
 
         query = request.query.strip() if request.query else ""
 
-        logger.info(f"Received query: {query}")
+        logger.info(f"Query: {query}")
 
 
-        # call agent
+        # agent decision
         agent_result = run_agent(query)
 
-        logger.info(f"Agent result: {agent_result}")
 
-
-        # normalize agent output
         modules = []
 
 
@@ -114,19 +116,17 @@ def analyze(request: AnalyzeRequest):
                 modules = [action]
 
 
-        # fallback
         if not modules:
 
             modules = ["nlp"]
 
 
-        logger.info(f"Modules selected: {modules}")
+        logger.info(f"Module selected: {modules}")
 
 
         module_outputs = {}
 
 
-        # run modules
         for module in modules:
 
             service = SERVICE_MAP.get(module)
@@ -143,6 +143,8 @@ def analyze(request: AnalyzeRequest):
                 )
 
             else:
+
+                logger.error(f"{module} not implemented")
 
                 module_outputs[module] = {
 
@@ -166,7 +168,7 @@ def analyze(request: AnalyzeRequest):
 
     except Exception as e:
 
-        logger.error(f"Critical error: {str(e)}")
+        logger.error(f"Critical error | {str(e)}")
 
         return {
 
@@ -184,8 +186,6 @@ def analyze(request: AnalyzeRequest):
 
             },
 
-            "status": "error",
-
-            "details": str(e)
+            "status": "error"
 
         }

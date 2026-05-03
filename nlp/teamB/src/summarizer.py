@@ -1,3 +1,5 @@
+from teamB.src.llm_enhancer import ask_llm
+
 import re
 
 
@@ -148,3 +150,29 @@ def summarize(text):
     ]
 
     return ". ".join(selected_sentences) + "."
+
+
+def smart_summary(text):
+
+    basic_summary = summarize(text)
+
+    prompt = f"""
+You are a text summarization assistant.
+Rules:
+- Return only summary text
+- No Labels
+- No explanations
+
+Text:
+\"\"\"{text}\"\"\"
+
+Initial summary:
+{basic_summary}
+"""
+
+    llm_result = ask_llm(prompt)
+
+    if llm_result:
+        return llm_result
+
+    return basic_summary

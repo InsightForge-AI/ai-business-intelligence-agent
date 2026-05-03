@@ -77,20 +77,23 @@ section[data-testid="stSidebar"] button:hover{
 
 .block-container{
     padding-top:20px;
-    padding-bottom:120px;
+    padding-bottom:50px;
 }
 
 /* header */
 .top-bar{
     position:fixed;
-    top:0;
+    top:60;
     left:0;
     width:100%;
-    height:55px;
+    height:60px;
     background:white;
     display:flex;
     align-items:center;
     justify-content:center;
+    font-size:26px;
+    font-weight:600;
+    font-family:Georgia,serif;
     border-bottom:1px solid #e5e7eb;
     z-index:9999;
 }
@@ -125,11 +128,11 @@ section[data-testid="stSidebar"] button:hover{
 .result-container{
     max-width:780px;
     margin:auto;
-    margin-top:25px;
+    margin-top:15px;
 }
 
 .result-container div{
-    padding:12px !important;
+    padding:8px !important;
     font-size:14px !important;
 }
 
