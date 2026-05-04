@@ -19,9 +19,7 @@ def preprocess(text):
 
 import re
 
-
-def preprocess(text):
-
+def summarize_text(text):
     if not text or text.strip() == "":
         return None
 
@@ -130,17 +128,14 @@ def summarize(text):
         if i == 0:
             score += 2
 
-        sentence_scores[i] = score
+    # remove special characters
+    clean_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
 
-    # Pick top scored sentences
-    top_indexes = sorted(
-        sentence_scores,
-        key=sentence_scores.get,
-        reverse=True
-    )[:summary_length]
+    # remove extra spaces
+    clean_text = " ".join(clean_text.split())
 
-    # Keep original order
-    top_indexes = sorted(top_indexes)
+    # Capitalize first letter (optional)
+    clean_text = clean_text.strip()
 
     # Safe indexing fix
     selected_sentences = [

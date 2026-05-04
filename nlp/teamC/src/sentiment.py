@@ -14,10 +14,7 @@ def preprocess_text(text):
 
 
 def get_sentiment(text):
-   
-    text = preprocess_text(text)
-
-    if not text:
+    if not text or text.strip() == "":
         return "neutral"
 
     positive_words = {
@@ -42,14 +39,13 @@ def get_sentiment(text):
         return "mixed"
     elif positive_count > 0 and negative_count > 0:
         return "mixed"
-    elif positive_count > negative_count:
-        if "not" in words:
-            return "negative"
+
+    elif pos > neg:
         return "positive"
-    elif negative_count > positive_count:
-        if "not" in words:
-            return "positive"
+
+    elif neg > pos:
         return "negative"
+
     else:
         return "neutral"
     
