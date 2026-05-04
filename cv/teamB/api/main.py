@@ -8,6 +8,12 @@ sys.path.append(str(BASE_DIR))
 # ⬇️ Imports
 from fastapi import FastAPI, UploadFile, File
 from src.image_analysis import analyze_image
+
+app = FastAPI()   # ✅ IMPORTANT
+
+@app.post("/cv/analyze")
+async def cv_analyze(file: UploadFile = File(None)):
+    return await analyze_image(file)
 import shutil
 from PIL import Image
 

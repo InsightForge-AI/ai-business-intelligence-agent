@@ -36,6 +36,16 @@ def analyze_text(data: dict):
         keywords_result = smart_keywords(text) or base_keywords
 
         summary_result = smart_summary(text) or base_summary
+from pydantic import BaseModel
+
+from nlp.teamC.src.sentiment import get_sentiment
+from nlp.teamC.src.summary import summarize_text
+from nlp.teamC.src.keywords import extract_keywords
+
+app = FastAPI()
+
+class TextRequest(BaseModel):
+    text: str
 
        
 
@@ -54,6 +64,9 @@ def analyze_text(data: dict):
             "sentiment": "neutral",
             "summary": "processing error",
             "keywords": [],
+@app.post("/nlp/analyze")
+def analyze(data: TextRequest):
+    text = data.text.strip()
 
 
         }

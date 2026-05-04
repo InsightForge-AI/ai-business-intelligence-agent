@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 import concurrent.futures
+import logging
+import time
 
 from app.services.cv_service import run_cv
 from app.services.agent_service import run_agent
@@ -8,123 +10,154 @@ from app.services.ml_service import run_ml
 from app.services.nlp_service import run_nlp
 from app.services.rag_service import run_rag
 
+
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 class AnalyzeRequest(BaseModel):
     query: str
 
 
-# timeout limit (seconds)
+SERVICE_MAP = {
+
+    "nlp": run_nlp,
+    "ml": run_ml,
+    "rag": run_rag,
+    "cv": run_cv
+
+}
+
+
 TIMEOUT = 5
 
 
-def safe_execute(func, query, module_name):
+def execute_with_timeout(service, query, module):
+
+    start_time = time.time()
 
     try:
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            future = executor.submit(func, query)
+            future = executor.submit(service, query)
 
             result = future.result(timeout=TIMEOUT)
 
-            return result
+
+        execution_time = round(time.time() - start_time, 3)
+
+        logger.info(f"{module} executed in {execution_time}s")
+
+        return result
+
 
     except concurrent.futures.TimeoutError:
 
+        execution_time = round(time.time() - start_time, 3)
+
+        logger.error(f"{module} timeout after {execution_time}s")
+
         return {
-            "error": f"{module_name} timeout",
-            "fallback": "default response"
+
+            "error": f"{module} timeout"
+
         }
+
 
     except Exception as e:
 
+        execution_time = round(time.time() - start_time, 3)
+
+        logger.error(f"{module} failed after {execution_time}s | {str(e)}")
+
         return {
-            "error": f"{module_name} failed",
-            "details": str(e),
-            "fallback": "safe response"
+
+            "error": str(e)
+
         }
 
 
-
 @router.post("/analyze")
+
 def analyze(request: AnalyzeRequest):
 
     try:
 
-        # ---------- Agent Call ----------
-        try:
-            agent_results = run_agent(request.query)
+        query = request.query.strip() if request.query else ""
 
-        except Exception as e:
-
-            agent_results = {
-                "modules": ["nlp"],  # fallback
-                "error": "agent failed",
-                "details": str(e)
-            }
+        logger.info(f"Query: {query}")
 
 
-        # ---------- Support both formats ----------
-        action = agent_results.get("action")
-        modules = agent_results.get("modules")
+        # agent decision
+        agent_result = run_agent(query)
 
-        # convert old format -> new format
-        if not modules and action:
-            modules = [action]
 
-        # fallback
+        modules = []
+
+
+        if isinstance(agent_result, str):
+
+            modules = [agent_result]
+
+
+        elif isinstance(agent_result, list):
+
+            modules = agent_result
+
+
+        elif isinstance(agent_result, dict):
+
+            action = agent_result.get("action")
+
+            if action:
+
+                modules = [action]
+
+
         if not modules:
+
             modules = ["nlp"]
+
+
+        logger.info(f"Module selected: {modules}")
 
 
         module_outputs = {}
 
 
-        # ---------- Module Execution ----------
         for module in modules:
 
-            if module == "nlp":
+            service = SERVICE_MAP.get(module)
 
-                module_outputs["nlp"] = safe_execute(
-                    run_nlp, request.query, "nlp"
+
+            if service:
+
+                module_outputs[module] = execute_with_timeout(
+
+                    service,
+                    query,
+                    module
+
                 )
-
-
-            elif module == "ml":
-
-                module_outputs["ml"] = safe_execute(
-                    run_ml, request.query, "ml"
-                )
-
-
-            elif module == "rag":
-
-                module_outputs["rag"] = safe_execute(
-                    run_rag, request.query, "rag"
-                )
-
-
-            elif module == "cv":
-
-                module_outputs["cv"] = safe_execute(
-                    run_cv, request.query, "cv"
-                )
-
 
             else:
 
+                logger.error(f"{module} not implemented")
+
                 module_outputs[module] = {
+
                     "error": "module not implemented"
+
                 }
 
 
-        # ---------- Final Response ----------
         return {
 
-            "query": request.query,
+            "query": query,
 
-            "agent": agent_results,
+            "agent": modules,
 
             "module_results": module_outputs,
 
@@ -135,21 +168,24 @@ def analyze(request: AnalyzeRequest):
 
     except Exception as e:
 
-        # ---------- Global fallback ----------
+        logger.error(f"Critical error | {str(e)}")
+
         return {
 
             "query": request.query,
 
-            "status": "failed",
+            "agent": ["nlp"],
 
-            "fallback": {
+            "module_results": {
 
-                "modules": ["nlp", "ml", "rag", "cv"],
+                "nlp": {
 
-                "message": "system fallback response"
+                    "error": "fallback response"
+
+                }
 
             },
 
-            "error": str(e)
+            "status": "error"
 
         }

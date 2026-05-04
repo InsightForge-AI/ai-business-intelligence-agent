@@ -9,26 +9,21 @@ def load(name, path):
     return mod
 
 BASE = os.path.dirname(__file__)
-SRC = os.path.join(BASE, "..", "src")
+SRC  = os.path.join(BASE, "..", "src")
+LLM  = os.path.join(BASE, "..", "llm")
 
-preprocess = load("p", os.path.join(SRC, "preprocess.py")).preprocess
-analyze = load("a", os.path.join(SRC, "analysis.py")).analyze
-get_insights = load("i", os.path.join(SRC, "insights.py")).get_insights
+analyze  = load("a", os.path.join(SRC, "analysis.py")).analyze
+call_llm = load("l", os.path.join(LLM, "llm.py")).call_llm
 
 app = FastAPI()
 
-class SalesRequest(BaseModel):
-    data: str # Reverted to string
+class QueryRequest(BaseModel):
+    query: str
 
 @app.post("/ml/analyze")
-def ml_analyze(req: SalesRequest):
-    # This path points to the actual CSV file in your data folder
-    filepath = os.path.join(BASE, "..", "data", "sales_data.csv")
-    df = preprocess(filepath)
-    res = analyze(df)
-    res.update(get_insights(res))
-    return res
+def ml_analyze(req: QueryRequest):
+    return analyze(req.query, call_llm)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
