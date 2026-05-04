@@ -3,12 +3,12 @@ from fastapi import FastAPI
 #importing stable functions
 from nlp.teamC.src.sentiment import get_sentiment
 from nlp.teamC.src.keywords import get_keywords
-from nlp.teamC.src.summarizer import summarize
+from nlp.teamC.src.summary import summarize
 
 #importing smart functions
 from nlp.teamC.src.sentiment import smart_sentiment
 from nlp.teamC.src.keywords import smart_keywords
-from nlp.teamC.src.summarizer import smart_summary
+from nlp.teamC.src.summary import smart_summary
 
 
 app = FastAPI()
