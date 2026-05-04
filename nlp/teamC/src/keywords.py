@@ -97,4 +97,4 @@ def smart_keywords(text):
 
         return filtered
 
-    return basic_keywords 
+    return basic_keywords
