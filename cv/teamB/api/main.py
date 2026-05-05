@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import sys
 from pathlib import Path
 
@@ -6,11 +7,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
 # ⬇️ Imports
+=======
+>>>>>>> f841ba2 (Removed image_analysis module)
 from fastapi import FastAPI, UploadFile, File
-from src.image_analysis import analyze_image
+from src.integration import process_image
 
-app = FastAPI()   # ✅ IMPORTANT
+app = FastAPI()
 
+<<<<<<< HEAD
 @app.post("/cv/analyze")
 async def cv_analyze(file: UploadFile = File(None)):
     return await analyze_image(file)
@@ -108,3 +112,21 @@ async def analyze(file: UploadFile = File(None)):
             "message": "Processing failed",
             "file_name": file.filename if file else None
         }
+=======
+@app.post("/analyze")
+async def analyze(file: UploadFile = File(...)):
+    try:
+        # Direct file pass karo (no manual save needed)
+        result = await process_image(file)
+
+        return {
+            "status": "success",
+            "data": result
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+>>>>>>> f841ba2 (Removed image_analysis module)
