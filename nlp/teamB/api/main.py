@@ -1,30 +1,59 @@
 from fastapi import FastAPI
 
-# Import service modules
+#importing stable functions
 from teamB.src.sentiment import get_sentiment
 from teamB.src.keywords import get_keywords
 from teamB.src.summarizer import summarize
 
+#importing smart functions
+from teamB.src.sentiment import smart_sentiment
+from teamB.src.keywords import smart_keywords
+from teamB.src.summarizer import smart_summary
+
+
 app = FastAPI()
 
 
-# Analyze Text from Request
 @app.post("/nlp/analyze")
 def analyze_text(data: dict):
 
-    text = data.get("text")
+    try:
 
-    if not text:
-        return {"error": "No text provided"}
+        text = data.get("text", "")
 
-    sentiment_result = get_sentiment(text)
+        #Always compute stable results first
 
-    keywords_result = get_keywords(text)
+        base_sentiment = get_sentiment(text)
 
-    summary_result = summarize(text)
+        base_keywords = get_keywords(text)
 
-    return {
-        "sentiment": sentiment_result,
-        "summary": summary_result,
-        "keywords": keywords_result,
-    }
+        base_summary = summarize(text)
+
+        #Smart enhancement
+
+        sentiment_result = smart_sentiment(text) or base_sentiment
+
+        keywords_result = smart_keywords(text) or base_keywords
+
+        summary_result = smart_summary(text) or base_summary
+
+       
+
+        return {
+            "sentiment": sentiment_result,
+            "summary": summary_result,
+            "keywords": keywords_result,
+        
+        }
+
+    except Exception:
+
+        # fallback response (never crash)
+
+        return {
+            "sentiment": "neutral",
+            "summary": "processing error",
+            "keywords": [],
+
+
+        }

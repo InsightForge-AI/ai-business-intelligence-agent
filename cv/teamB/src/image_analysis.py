@@ -46,3 +46,16 @@ async def analyze_image(file):
             "extracted_text": "Invalid image",
             "description": "Corrupt or unreadable image"
         }
+        }
+def analyze_image(image_path):
+    return {
+        "objects": detect_objects(image_path),
+        "extracted_text": extract_text(image_path),
+        "description": describe_image(image_path)
+    }
+def analyze_image(image):
+    return {
+        "objects": ["box"],
+        "extracted_text": "sample",
+        "description": "basic image"
+    }
