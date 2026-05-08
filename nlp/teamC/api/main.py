@@ -1,26 +1,59 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 
+#importing stable functions
 from nlp.teamC.src.sentiment import get_sentiment
-from nlp.teamC.src.summary import summarize_text
-from nlp.teamC.src.keywords import extract_keywords
+from nlp.teamC.src.keywords import get_keywords
+from nlp.teamC.src.summary import summarize
+
+#importing smart functions
+from nlp.teamC.src.sentiment import smart_sentiment
+from nlp.teamC.src.keywords import smart_keywords
+from nlp.teamC.src.summary import smart_summary
+
 
 app = FastAPI()
 
-class TextRequest(BaseModel):
-    text: str
-
 
 @app.post("/nlp/analyze")
-def analyze(data: TextRequest):
-    text = data.text.strip()
+def analyze_text(data: dict):
 
-    sentiment = get_sentiment(text)
-    summary = summarize_text(text)
-    keywords = extract_keywords(text)
+    try:
 
-    return {
-        "sentiment": sentiment,
-        "summary": summary,
-        "keywords": keywords
-    }
+        text = data.get("text", "")
+
+        #Always compute stable results first
+
+        base_sentiment = get_sentiment(text)
+
+        base_keywords = get_keywords(text)
+
+        base_summary = summarize(text)
+
+        #Smart enhancement
+
+        sentiment_result = smart_sentiment(text) or base_sentiment
+
+        keywords_result = smart_keywords(text) or base_keywords
+
+        summary_result = smart_summary(text) or base_summary
+
+       
+
+        return {
+            "sentiment": sentiment_result,
+            "summary": summary_result,
+            "keywords": keywords_result,
+        
+        }
+
+    except Exception:
+
+        # fallback response (never crash)
+
+        return {
+            "sentiment": "neutral",
+            "summary": "processing error",
+            "keywords": [],
+
+
+        }
