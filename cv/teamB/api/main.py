@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from cv.teamB.src.integration import process_image
+from src.integration import process_image
 
 app = FastAPI()
 
@@ -10,6 +11,7 @@ async def analyze(file: UploadFile = File(...)):
         result = await process_image(file)
 
         # ✅ Return exact API contract
+        # ✅ Return EXACT API contract (no extra fields)
         return result
 
     except Exception as e:
