@@ -1,42 +1,33 @@
 import requests
 from config import CV_API_URL
-from pathlib import Path
 
 
-def run_cv(query):
+def run_cv(image_path):
 
-    # query should be image file path
+    try:
 
-    file_path = Path(query)
+        with open(image_path, "rb") as f:
 
+            files = {
+                "file": (
+                    image_path,
+                    f,
+                    "image/jpeg"
+                )
+            }
 
-    if not file_path.exists():
+            response = requests.post(
+                CV_API_URL,
+                files=files,
+                timeout=120
+            )
+
+        response.raise_for_status()
+
+        return response.json()
+
+    except Exception as e:
 
         return {
-
-            "error": "Image file not found",
-
-            "path": str(file_path)
-
+            "error": str(e)
         }
-
-
-    with open(file_path, "rb") as f:
-
-        files = {
-
-            "file": (file_path.name, f, "image/jpeg")
-
-        }
-
-
-        response = requests.post(
-
-            CV_API_URL,
-
-            files=files
-
-        )
-
-
-    return response.json()
