@@ -1,6 +1,6 @@
-from cv.teamB.src.ocr import extract_text
-from cv.teamB.src.labeling import analyze_image
-from cv.teamB.src.description import run_description
+from teamB.src.ocr import extract_text
+from teamB.src.labeling import analyze_image
+from teamB.src.description import run_description
 
 import shutil
 

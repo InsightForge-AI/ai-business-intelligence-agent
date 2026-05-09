@@ -1,6 +1,10 @@
 from fastapi import FastAPI, UploadFile, File
+<<<<<<< HEAD
 from cv.teamB.src.integration import process_image
 from src.integration import process_image
+=======
+from teamB.src.integration import process_image
+>>>>>>> 9e002aa (Updated import paths for backend integration)
 
 app = FastAPI()
 
