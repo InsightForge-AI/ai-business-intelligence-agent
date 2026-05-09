@@ -14,7 +14,7 @@ The JSON must have exactly these keys:
 - trend: one of "increasing", "decreasing", or "stable"
 - insights: exactly 3 short, punchy sentences.
 
-Constraint: All monetary values in Indian Rupees (₹). Respond with raw JSON only. Do not exceed 60 words for insights."""
+Constraint: All monetary values in Indian Rupees (₹). Respond with raw JSON only. Do not exceed 120 words for insights."""
 
 
 def get_insights(query: str, call_llm) -> dict:
@@ -26,7 +26,7 @@ def get_insights(query: str, call_llm) -> dict:
         "insights": None
     }
 
-    response = call_llm(build_prompt(query))
+    response = call_llm("deepseek-r1:1.5b", build_prompt(query))
 
     if not response:
         res["error"] = "LLM unavailable or connection timeout"
