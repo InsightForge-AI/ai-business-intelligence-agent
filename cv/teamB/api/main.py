@@ -1,5 +1,10 @@
 from fastapi import FastAPI, UploadFile, File
+<<<<<<< HEAD
+from cv.teamB.src.integration import process_image
 from src.integration import process_image
+=======
+from teamB.src.integration import process_image
+>>>>>>> 9e002aa (Updated import paths for backend integration)
 
 app = FastAPI()
 
@@ -9,6 +14,7 @@ async def analyze(file: UploadFile = File(...)):
         # ✅ Direct processing
         result = await process_image(file)
 
+        # ✅ Return exact API contract
         # ✅ Return EXACT API contract (no extra fields)
         return result
 
