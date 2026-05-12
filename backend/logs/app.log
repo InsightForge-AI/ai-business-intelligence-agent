@@ -1,0 +1,61 @@
+2026-05-08 22:41:18,825 | INFO | root | LOGGING WORKING
+2026-05-08 22:41:32,106 | INFO | app.api.analyze | Incoming query: This laptop is amazing, fast, and very reliable.
+2026-05-08 22:41:32,125 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:41:32,143 | INFO | app.api.analyze | nlp executed in 0.018s
+2026-05-08 22:41:38,750 | INFO | app.api.analyze | Incoming query: The delivery was delayed and the product quality is poor.
+2026-05-08 22:41:38,755 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:41:38,771 | INFO | app.api.analyze | nlp executed in 0.016s
+2026-05-08 22:41:46,244 | INFO | app.api.analyze | Incoming query: The camera quality is good but the battery drains quickly.
+2026-05-08 22:41:46,250 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:41:46,262 | INFO | app.api.analyze | nlp executed in 0.012s
+2026-05-08 22:41:52,515 | INFO | app.api.analyze | Incoming query: Analyze quarterly sales performance for smartphones in India.
+2026-05-08 22:41:52,520 | INFO | app.api.analyze | Selected modules: ['ml']
+2026-05-08 22:41:52,545 | INFO | app.api.analyze | ml executed in 0.025s
+2026-05-08 22:42:11,636 | INFO | app.api.analyze | Incoming query: Predict electronics market growth in Hyderabad.
+2026-05-08 22:42:11,641 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:42:11,656 | INFO | app.api.analyze | nlp executed in 0.014s
+2026-05-08 22:42:22,649 | INFO | app.api.analyze | Incoming query: What caused customer dissatisfaction?
+2026-05-08 22:42:22,654 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:42:22,667 | INFO | app.api.analyze | nlp executed in 0.013s
+2026-05-08 22:42:31,633 | INFO | app.api.analyze | Incoming query: Which campaign improved sales?
+2026-05-08 22:42:31,637 | INFO | app.api.analyze | Selected modules: ['ml']
+2026-05-08 22:42:31,646 | INFO | app.api.analyze | ml executed in 0.008s
+2026-05-08 22:42:47,916 | INFO | app.api.analyze | Incoming query: Analyze customer feedback sentiment.
+2026-05-08 22:42:47,920 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:42:47,936 | INFO | app.api.analyze | nlp executed in 0.015s
+2026-05-08 22:42:53,964 | INFO | app.api.analyze | Incoming query: Generate sales insights for retail business.
+2026-05-08 22:42:53,967 | INFO | app.api.analyze | Selected modules: ['ml']
+2026-05-08 22:42:53,971 | INFO | app.api.analyze | ml executed in 0.004s
+2026-05-08 22:43:02,641 | INFO | app.api.analyze | Incoming query: Search employee leave policy.
+2026-05-08 22:43:02,646 | INFO | app.api.analyze | Selected modules: ['rag']
+2026-05-08 22:43:02,655 | INFO | app.api.analyze | rag executed in 0.009s
+2026-05-08 22:43:16,975 | INFO | app.api.analyze | Incoming query: Analyze customer sentiment and predict sales growth.
+2026-05-08 22:43:16,981 | INFO | app.api.analyze | Selected modules: ['nlp', 'ml']
+2026-05-08 22:43:16,996 | INFO | app.api.analyze | nlp executed in 0.014s
+2026-05-08 22:43:17,002 | INFO | app.api.analyze | ml executed in 0.007s
+2026-05-08 22:43:25,452 | INFO | app.api.analyze | Incoming query: Analyze uploaded invoice image and summarize contents.
+2026-05-08 22:43:25,457 | INFO | app.api.analyze | Selected modules: ['nlp', 'cv']
+2026-05-08 22:43:25,470 | INFO | app.api.analyze | nlp executed in 0.013s
+2026-05-08 22:43:25,470 | INFO | app.api.analyze | cv executed in 0.0s
+2026-05-08 22:47:19,096 | INFO | app.api.analyze | Incoming query: Analyze customer sentiment and predict sales growth.
+2026-05-08 22:47:19,101 | INFO | app.api.analyze | Selected modules: ['nlp', 'ml']
+2026-05-08 22:47:19,119 | INFO | app.api.analyze | nlp executed in 0.017s
+2026-05-08 22:47:19,138 | INFO | app.api.analyze | ml executed in 0.019s
+2026-05-08 22:51:45,274 | INFO | root | LOGGING WORKING
+2026-05-08 22:56:13,190 | INFO | root | LOGGING WORKING
+2026-05-08 22:57:35,099 | INFO | app.api.analyze | Incoming query: This laptop is amazing, fast, and very reliable.
+2026-05-08 22:57:35,122 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:57:35,129 | INFO | app.api.analyze | nlp executed in 0.007s
+2026-05-08 22:57:44,652 | INFO | app.api.analyze | Incoming query: The delivery was delayed and the product quality is poor.
+2026-05-08 22:57:44,657 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 22:57:44,661 | INFO | app.api.analyze | nlp executed in 0.004s
+2026-05-08 23:07:06,744 | INFO | root | LOGGING WORKING
+2026-05-08 23:07:23,126 | INFO | app.api.analyze | Incoming query: Great, the phone stopped working in one day.
+2026-05-08 23:07:23,147 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 23:07:23,169 | INFO | app.api.analyze | nlp executed in 0.021s
+2026-05-08 23:07:38,975 | INFO | app.api.analyze | Incoming query: Artificial intelligence is transforming healthcare by improving diagnostics, automating workflows, and enabling personalized treatment plans.
+2026-05-08 23:07:38,981 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 23:07:38,998 | INFO | app.api.analyze | nlp executed in 0.017s
+2026-05-08 23:10:24,944 | INFO | app.api.analyze | Incoming query: Great, the phone stopped working in one day.
+2026-05-08 23:10:24,949 | INFO | app.api.analyze | Selected modules: ['nlp']
+2026-05-08 23:10:24,978 | INFO | app.api.analyze | nlp executed in 0.029s

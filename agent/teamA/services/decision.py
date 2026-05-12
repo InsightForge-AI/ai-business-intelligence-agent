@@ -4,6 +4,7 @@ import re
 from typing import Iterable
 
 from ..config import ROUTING_KEYWORDS, ROUTING_PHRASES
+from .llm_router import refine_module_decision
 
 NON_ALNUM_PATTERN = re.compile(r"[^a-z0-9\s]+")
 SPACE_PATTERN = re.compile(r"\s+")
@@ -64,7 +65,19 @@ def decide_modules(query: str) -> list[str]:
     if not ranked_modules:
         return ["nlp"]
 
-    return [module for module in ROUTING_KEYWORDS if module in ranked_modules]
+    rule_modules = [
+    module
+    for module in ROUTING_KEYWORDS
+    if module in ranked_modules
+    ]
+
+    # Sprint 4 intelligent refinement using LLaMA3
+    final_modules = refine_module_decision(
+    query=query,
+    detected_modules=rule_modules
+    )
+
+    return final_modules
 
 
 def decide(query: str) -> str:
