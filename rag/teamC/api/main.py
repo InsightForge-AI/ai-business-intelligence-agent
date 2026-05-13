@@ -6,7 +6,8 @@ import os
 # allow imports from src folder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.search import simple_search,generate_llm_answer
+from src.search import simple_search
+from src.llm_generator import generate_llm_answer
 
 app = FastAPI()
 
@@ -24,9 +25,6 @@ def home():
 def rag_query(request: QueryRequest):
 
     query = request.query
-
-    query = request.query
-
     # ------------------------
     # EDGE CASE: EMPTY
     # ------------------------
@@ -39,6 +37,10 @@ def rag_query(request: QueryRequest):
             "message": "empty query"
         }
 
+
+    # ------------------------
+    # RETRIEVAL
+    # ------------------------
     results = simple_search(query)
 
     # ------------------------
@@ -47,7 +49,7 @@ def rag_query(request: QueryRequest):
     if len(results) == 0:
         return {
             "query": query,
-            "answer": "",
+            "answer": "Information not available in retrieved documents.",
             "content": [],
             "total_results": 0,
             "message": "not found"
