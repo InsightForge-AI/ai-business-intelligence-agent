@@ -19,13 +19,17 @@ chunks = split_documents(documents)
 
 embeddings = load_embeddings()
 
-db = create_vectorstore(chunks, embeddings)
+db = create_vectorstore(
+    chunks,
+    embeddings
+)
 
 class QueryRequest(BaseModel):
     query: str
 
+
 @router.post("/rag/query")
-def rag_query(data: QueryRequest):
+def rag(data: QueryRequest):
 
     try:
 
@@ -34,13 +38,21 @@ def rag_query(data: QueryRequest):
             data.query
         )
 
+        context = "\n".join(
+            [doc.page_content for doc in docs]
+        )
+
         answer = generate_answer(
             data.query,
             docs
         )
 
         return {
+
             "query": data.query,
+
+            "context": context,
+
             "answer": answer
         }
 
