@@ -1,4 +1,7 @@
 from teamB.src.ocr import extract_text
+from teamB.src.labeling import analyze_image_bytes
+from teamB.src.description import describe_image_bytes
+
 from teamB.src.labeling import analyze_image
 from teamB.src.description import run_description
 
@@ -34,21 +37,27 @@ from src.labeling import analyze_image_bytes
 from src.description import describe_image_bytes
 
 async def process_image(file):
+
     try:
-        # ✅ Read ONCE
+        # ✅ Read image ONCE
         contents = await file.read()
 
-        # OCR (file path ke liye temp save)
+        # ✅ Save temp image for OCR
         file_path = f"temp_{file.filename}"
+
         with open(file_path, "wb") as f:
             f.write(contents)
 
+        # ✅ OCR
         text = extract_text(file_path)
 
-        # ✅ SAME BYTES use karo
+        # ✅ Labeling
         labels = await analyze_image_bytes(contents)
+
+        # ✅ Description
         description = await describe_image_bytes(contents)
 
+        # ✅ Final API response
         return {
             "text": text,
             "labels": labels,
@@ -56,7 +65,9 @@ async def process_image(file):
         }
 
     except Exception as e:
+
         print("INTEGRATION ERROR:", e)
+
         return {
             "text": "",
             "labels": [],

@@ -56,24 +56,46 @@ async def analyze_image(file):
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "llava:latest"
 
+
+# ✅ Retry helper
 async def call_ollama(payload):
-    for i in range(3):  # 🔁 retry 3 times
+
+    for i in range(3):
+
         try:
             async with httpx.AsyncClient(timeout=180.0) as client:
-                res = await client.post(OLLAMA_URL, json=payload)
-                return res
+
+                response = await client.post(
+                    OLLAMA_URL,
+                    json=payload
+                )
+
+                response.raise_for_status()
+
+                return response
+
         except Exception as e:
+
             print(f"Retry {i+1}:", e)
-            await asyncio.sleep(1)
+
+            await asyncio.sleep(2)
+
     return None
 
+
+# ✅ Main labeling function
 async def analyze_image_bytes(contents: bytes):
+
     try:
-        image_b64 = base64.b64encode(contents).decode()
+        # ✅ Convert image to base64
+        image_b64 = base64.b64encode(contents).decode("utf-8")
 
         payload = {
             "model": MODEL,
-            "prompt": "List 3-5 objects in this image as simple words separated by commas.",
+            "prompt": (
+                "Look at this image and return only 3 to 5 object names "
+                "separated by commas."
+            ),
             "images": [image_b64],
             "stream": False
         }
@@ -131,23 +153,50 @@ async def analyze_image_bytes(contents: bytes):
 
         res = await call_ollama(payload)
 
-        if res is None:
+        if response is None:
             return ["model not responding"]
 
-        print("LABEL RAW:", res.text)
+        print("LABEL RESPONSE:", response.text)
 
-        data = res.json()
-        raw = data.get("response", "").lower().strip()
+        # ✅ Parse response
+        data = response.json()
+
+        raw = data.get("response", "").strip().lower()
 
         if not raw:
-            return ["no objects"]
+            return ["no objects detected"]
 
-        raw = raw.replace("\n", " ").replace(".", "")
+        # ✅ Clean response
+        raw = (
+            raw.replace("\n", " ")
+               .replace(".", "")
+               .replace("objects:", "")
+               .replace("labels:", "")
+        )
 
-        labels = raw.split(",") if "," in raw else raw.split()
+        # ✅ Split labels
+        if "," in raw:
+            labels = raw.split(",")
+        else:
+            labels = raw.split()
 
-        return [x.strip() for x in labels if len(x.strip()) > 2]
+        # ✅ Final clean labels
+        final_labels = []
+
+        for label in labels:
+
+            label = label.strip()
+
+            if len(label) > 1:
+                final_labels.append(label)
+
+        # ✅ Remove duplicates
+        final_labels = list(dict.fromkeys(final_labels))
+
+        return final_labels[:5]
 
     except Exception as e:
-        print("LABEL ERROR:", e)
+
+        print("LABELING ERROR:", e)
+
         return ["labeling failed"]
