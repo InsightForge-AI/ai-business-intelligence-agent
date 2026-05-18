@@ -1,18 +1,23 @@
 import requests
 
+
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 
 
-def call_llm(model, prompt):
+def call_llm(model: str, prompt: str):
+    """Send prompt to Ollama model."""
 
     try:
-
         response = requests.post(
             OLLAMA_URL,
             json={
                 "model": model,
                 "prompt": prompt,
-                "stream": False
+                "stream": False,
+                "options": {
+                    "temperature": 0.2,
+                    "num_predict": 1000
+                }
             },
             timeout=120
         )
@@ -23,8 +28,10 @@ def call_llm(model, prompt):
 
         return data.get("response", "")
 
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
+        print("LLM Request Error:", e)
+        return None
 
-        print("LLM ERROR:", e)
-
+    except ValueError as e:
+        print("Invalid JSON Response:", e)
         return None

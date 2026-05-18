@@ -3,22 +3,20 @@ import re
 
 
 def build_prompt(query: str) -> str:
-    return f"""You are a Senior Business Intelligence Consultant specialized in the Indian Retail Market.
-The user is asking for analysis on: "{query}"
+    return f"""You are a business analyst. Answer this query: "{query}"
 
-Task: Generate a realistic simulated analysis based on Indian market benchmarks.
+Reply with only a JSON object with these keys:
+- total_sales: estimated sales in Indian Rupees using proper Indian business number formatting like ₹ symbol and Cr or Lakh Cr format
+- top_product: a specific product name with brand and model, not just the brand name
+- trend: one of increasing, decreasing, or stable
+- insights: maximum 2 sentences covering what the data shows and one recommendation
 
-The JSON must have exactly these keys:
-- total_sales: a string in human-readable Indian terms (e.g., '₹1.5 Lakh Cr', '₹850 Cr', or '₹40 Lakh')
-- top_product: a specific product model or sub-category
-- trend: one of "increasing", "decreasing", or "stable"
-- insights: exactly 3 short, punchy sentences.
-
-Constraint: All monetary values in Indian Rupees (₹). Respond with raw JSON only. Do not exceed 120 words for insights."""
+Raw JSON only. No explanation. No markdown."""
 
 
 def get_insights(query: str, call_llm) -> dict:
-    res = {
+
+    result = {
         "total_sales": None,
         "top_product": None,
         "trend": None,
@@ -26,30 +24,53 @@ def get_insights(query: str, call_llm) -> dict:
         "insights": None
     }
 
-    response = call_llm("deepseek-r1:1.5b", build_prompt(query))
+    llm_response = call_llm(
+        "deepseek-r1:1.5b",
+        build_prompt(query)
+    )
 
-    if not response:
-        res["error"] = "LLM unavailable or connection timeout"
-        return res
+    if not llm_response:
+        result["error"] = "LLM unavailable or connection timeout"
+        return result
 
     try:
-        clean_response = re.sub(r"<think>.*?</think>", "", response, flags=re.DOTALL).strip()
-        match = re.search(r"\{.*\}", clean_response, re.DOTALL)
-        if match:
-            data = json.loads(match.group())
-            res["total_sales"] = data.get("total_sales", "₹0")
-            res["top_product"] = data.get("top_product")
-            res["trend"]       = data.get("trend")
-            res["error"]       = None
 
-            raw_insights = data.get("insights", "")
-            if isinstance(raw_insights, list):
-                raw_insights = " ".join(raw_insights)
-            sentences = re.split(r'(?<=[.!?]) +', str(raw_insights).strip())
-            res["insights"] = " ".join(sentences[:3])
-        else:
-            res["error"] = "Could not parse LLM JSON response"
+        cleaned_response = re.sub(
+            r"<think>.*?</think>",
+            "",
+            llm_response,
+            flags=re.DOTALL
+        ).strip()
+
+        json_match = re.search(
+            r"\{.*\}",
+            cleaned_response,
+            re.DOTALL
+        )
+
+        if not json_match:
+            result["error"] = "Could not parse LLM JSON response"
+            return result
+
+        parsed_data = json.loads(json_match.group())
+
+        result["total_sales"] = parsed_data.get("total_sales", "₹0")
+        result["top_product"] = parsed_data.get("top_product")
+        result["trend"] = parsed_data.get("trend")
+
+        raw_insights = parsed_data.get("insights", "")
+
+        if isinstance(raw_insights, list):
+            raw_insights = " ".join(raw_insights)
+
+        sentences = re.split(
+            r'(?<=[.!?]) +',
+            str(raw_insights).strip()
+        )
+
+        result["insights"] = " ".join(sentences[:2])
+
     except Exception as e:
-        res["error"] = f"Internal processing error: {str(e)}"
+        result["error"] = f"Internal processing error: {str(e)}"
 
-    return res
+    return result
