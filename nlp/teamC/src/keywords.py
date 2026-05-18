@@ -1,100 +1,86 @@
+from nlp.teamC.src.preprocessing import clean_text
 from nlp.teamC.src.llm import ask_llm
+
+
+stop_words = {
+    "the", "is", "and", "a", "an",
+    "to", "of", "in", "on", "for",
+    "with", "this", "that", "it"
+}
+
 
 def get_keywords(text):
 
-    # Preprocessing
-    if text is None:
-        return ["No keywords found"]
+    try:
 
-    text = str(text)
+        cleaned = clean_text(text)
 
-    # lowercase
-    text = text.lower()
+        if not cleaned:
+            return []
 
-    # remove special characters
-    import re
-    text = re.sub(r"[^a-z0-9\s]", " ", text)
+        words = cleaned.split()
 
-    # remove extra spaces
-    text = re.sub(r"\s+", " ", text).strip()
+        keywords = []
+        seen = set()
 
-    # Handle empty input
-    if not text:
-        return ["No keywords found"]
+        for word in words:
 
-    words = text.split()
+            if word not in stop_words:
 
-    stop_words = [
-        "the","this","that","it", "is", "and", "but","i","am","i'm",
-        "a", "an", "to", "of","or","was",
-        "in", "on", "for", "with","are", "be", "by", "as", "at", "from","since"
-          ]
+                if word not in seen:
 
-    keywords = []
-    seen = set()
+                    keywords.append(word)
+                    seen.add(word)
 
-    for word in words:
+        return keywords
 
-        if word not in stop_words:
+    except Exception:
+        return []
 
-            # Remove duplicates
-            if word not in seen:
-                keywords.append(word)
-                seen.add(word)
-
-
-
-    if len(keywords) == 0:
-            return ["No keywords found"]
-
-    return keywords
-
-#LLM Enhancement
 
 def smart_keywords(text):
 
-    basic_keywords = get_keywords(text)
+    try:
 
-    prompt = f"""
-    You are a keyword extraction assistant.
+        base_keywords = get_keywords(text)
 
-    Text:
-    \"\"\"{text}\"\"\"
+        prompt = f"""
+You are a keyword extraction assistant.
 
-    Initial keywords:
-    {basic_keywords}
+Text:
+\"\"\"{text}\"\"\"
 
-    Rules:
-    - Use ONLY keywords from the initial keywords list
-    - Do NOT add new keywords
-    - Remove only clearly duplicate or meaningless words
-    - Keep meaningful descriptive words
-    - Keep subject and feature words
-    - Keep topic words and object names
-    - Return keywords as a comma-separated list.
-    - No sentences.No explanations
-    """
+Initial keywords:
+{base_keywords}
 
-    llm_result = ask_llm(prompt)
+Rules:
+- Use only words from initial keywords
+- Return comma separated keywords only
+- No explanation
+"""
 
-    if llm_result:
+        llm_result = ask_llm(prompt)
 
-        words = llm_result.split(",")
+        if llm_result:
 
-        cleaned = [
-            w.strip().lower()
-            for w in words
-        ]
+            words = [
+                w.strip().lower()
+                for w in llm_result.split(",")
+            ]
 
-        filtered = [
-            w for w in cleaned
-            if w in basic_keywords
-        ]
+            filtered = []
 
-        # Safety fallback
-        if len(filtered) < 2:
-            return basic_keywords
+            for word in words:
 
-        return filtered
+                if word in base_keywords:
 
-    return basic_keywords
+                    if word not in filtered:
+                        filtered.append(word)
+
+            if filtered:
+                return filtered
+
+        return base_keywords
+
+    except Exception:
+        return get_keywords(text)
