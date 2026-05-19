@@ -1,12 +1,5 @@
-documents = [
-    {"id": 1, "text": "sales dropped due to bad delivery"},
-    {"id": 2, "text": "customers complaining about late delivery"},
-    {"id": 3, "text": "sales increased after marketing campaign"},
-    {"id": 4, "text": "delivery delay caused customer dissatisfaction"}
-]
+from .documents import documents
 
-
-# synonym rules to satisfy test cases
 SYNONYMS = {
     "issue": ["delivery"],
     "problem": ["delivery"],
@@ -28,15 +21,16 @@ SYNONYMS = {
     "effect": ["marketing"],
     "unhappy": ["dissatisfaction"],
     "negative": ["dissatisfaction"],
-    "dissatisfied": ["dissatisfaction"],
-    "issue": ["complaining", "dissatisfaction"]
+    "dissatisfied": ["dissatisfaction"]
 }
 
 
 def expand_query_words(query_words):
+
     expanded = set(query_words)
 
     for word in query_words:
+
         if word in SYNONYMS:
             expanded.update(SYNONYMS[word])
 
@@ -50,17 +44,21 @@ def simple_search(query: str):
 
     query_words = query.lower().split()
 
-    # expand query words using synonyms
     query_words = expand_query_words(query_words)
 
     results = []
+
     seen_ids = set()
 
     for doc in documents:
 
         text = doc["text"].lower()
 
-        score = sum(1 for word in query_words if word in text)
+        score = sum(
+            1
+            for word in query_words
+            if word in text
+        )
 
         if score > 0:
 
@@ -75,6 +73,9 @@ def simple_search(query: str):
                 "score": score
             })
 
-    results.sort(key=lambda x: x["score"], reverse=True)
+    results.sort(
+        key=lambda x: x["score"],
+        reverse=True
+    )
 
-    return results
+    return results[:3]

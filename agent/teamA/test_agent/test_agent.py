@@ -1,10 +1,9 @@
 """
 Unit tests for Agent Team A - API Contract Compliance
-Tests ensure the agent correctly routes queries to NLP, ML, or CV services
+Tests ensure the Sprint 4 agent routes queries to the correct modules.
 """
 
 import importlib
-import pytest
 from fastapi.testclient import TestClient
 from pathlib import Path
 import sys
@@ -15,6 +14,7 @@ from agent.teamA.app import app
 
 
 client = TestClient(app)
+VALID_MODULES = {"nlp", "ml", "cv", "rag"}
 
 
 def assert_route_result(response, expected_result):
@@ -31,11 +31,14 @@ class TestHealthCheck:
         assert response.status_code == 200
 
     def test_health_check_response_contains_status(self):
-        """Health check response should contain status"""
+        """Health check should expose Sprint 4 metadata."""
         response = client.get("/")
         data = response.json()
         assert "status" in data
         assert "running" in data["status"].lower()
+        assert data["sprint"] == 4
+        assert data["version"] == "2.0.0"
+        assert data["endpoint"] == "POST /agent/analyze"
 
 
 class TestAgentAnalyzeNLP:
@@ -59,6 +62,11 @@ class TestAgentAnalyzeNLP:
     def test_route_feedback_query_to_nlp(self):
         """Query with 'feedback' should route to NLP"""
         response = client.post("/agent/analyze", json={"query": "show customer feedback"})
+        assert_route_result(response, "nlp")
+
+    def test_route_summary_query_to_nlp(self):
+        """Sprint 4 summary phrasing should route to NLP."""
+        response = client.post("/agent/analyze", json={"query": "summarize customer reviews"})
         assert_route_result(response, "nlp")
 
     def test_route_noisy_positive_text_to_nlp(self):
@@ -95,6 +103,11 @@ class TestAgentAnalyzeML:
         response = client.post("/agent/analyze", json={"query": "run analytics"})
         assert_route_result(response, "ml")
 
+    def test_route_sales_trend_analysis_to_ml(self):
+        """Sprint 4 trend-analysis phrasing should route to ML."""
+        response = client.post("/agent/analyze", json={"query": "sales trend analysis"})
+        assert_route_result(response, "ml")
+
 
 class TestAgentAnalyzeCV:
     """Tests for CV routing"""
@@ -112,6 +125,11 @@ class TestAgentAnalyzeCV:
     def test_route_visual_query_to_cv(self):
         """Query with 'visual' should route to CV"""
         response = client.post("/agent/analyze", json={"query": "visual analysis"})
+        assert_route_result(response, "cv")
+
+    def test_route_ocr_query_to_cv(self):
+        """Sprint 4 OCR phrasing should route to CV."""
+        response = client.post("/agent/analyze", json={"query": "ocr this image"})
         assert_route_result(response, "cv")
 
 
@@ -146,6 +164,31 @@ class TestAgentAnalyzeMultiIntent:
         """Uppercase and symbols should still preserve all detected modules."""
         response = client.post("/agent/analyze", json={"query": "ANALYZE!!! PRODUCT IMAGE REVIEW???"})
         assert_route_result(response, ["nlp", "cv"])
+
+    def test_reviews_and_sales_trend_routes_to_nlp_and_ml(self):
+        """Sprint 4 text + analytics phrasing should route to NLP and ML."""
+        response = client.post("/agent/analyze", json={"query": "reviews and sales trend"})
+        assert_route_result(response, ["nlp", "ml"])
+
+    def test_image_review_summary_routes_to_nlp_and_cv(self):
+        """Sprint 4 review summary + image phrasing should route to NLP and CV."""
+        response = client.post("/agent/analyze", json={"query": "image review summary"})
+        assert_route_result(response, ["nlp", "cv"])
+
+    def test_plus_connector_routes_to_nlp_and_ml(self):
+        """Plus connector should preserve both modules."""
+        response = client.post("/agent/analyze", json={"query": "reviews plus sales data"})
+        assert_route_result(response, ["nlp", "ml"])
+
+    def test_with_connector_routes_to_nlp_and_cv(self):
+        """With connector should preserve both modules."""
+        response = client.post("/agent/analyze", json={"query": "ocr image with customer reviews"})
+        assert_route_result(response, ["nlp", "cv"])
+
+    def test_along_with_connector_routes_to_ml_and_rag(self):
+        """Along with should normalize safely for multi-intent routing."""
+        response = client.post("/agent/analyze", json={"query": "sales trend along with policy document"})
+        assert_route_result(response, ["ml", "rag"])
 
 
 class TestAgentAnalyzeFallbacks:
@@ -193,7 +236,10 @@ class TestAPIContract:
         """Response must be a raw module string or a list of module strings."""
         response = client.post("/agent/analyze", json={"query": "analyze reviews"})
         data = response.json()
-        assert data in ["nlp", "ml", "cv", "rag"] or isinstance(data, list)
+        if isinstance(data, list):
+            assert set(data).issubset(VALID_MODULES)
+        else:
+            assert data in VALID_MODULES
 
     def test_no_api_calls_made(self):
         """Sprint 1: Should not make any API calls - only decide"""

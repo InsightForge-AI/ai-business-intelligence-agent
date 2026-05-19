@@ -1,2 +1,6 @@
 fastapi
 uvicorn
+transformers
+torch
+accelerate
+sentencepiece
