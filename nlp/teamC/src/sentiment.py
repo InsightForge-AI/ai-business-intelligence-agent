@@ -1,90 +1,95 @@
-import re
+from nlp.teamC.src.preprocessing import clean_text
 from nlp.teamC.src.llm import ask_llm
 
 
-def preprocess_text(text):
-    
-    if not text or not str(text).strip():
-        return ""
+positive_words = {
+    "good", "great", "excellent", "amazing",
+    "awesome", "love", "best", "fast",
+    "perfect", "nice", "smooth"
+}
 
-    text = str(text).lower()
-    text = re.sub(r"[^a-z0-9\s]", " ", text)   # remove symbols
-    text = re.sub(r"\s+", " ", text).strip()   # remove extra spaces
-    return text
+negative_words = {
+    "bad", "worst", "slow", "hate",
+    "terrible", "awful", "broken",
+    "lag", "poor", "bug"
+}
 
 
 def get_sentiment(text):
-    if not text or text.strip() == "":
+
+    try:
+
+        cleaned = clean_text(text)
+
+        if not cleaned:
+            return "neutral"
+
+        words = cleaned.split()
+
+        positive_count = sum(
+            1 for word in words
+            if word in positive_words
+        )
+
+        negative_count = sum(
+            1 for word in words
+            if word in negative_words
+        )
+
+        if positive_count > negative_count:
+            return "positive"
+
+        elif negative_count > positive_count:
+            return "negative"
+
+        elif positive_count > 0 and negative_count > 0:
+            return "mixed"
+
         return "neutral"
 
-    positive_words = {
-      "good", "great", "excellent", "amazing", "nice", "worth", "fast", "love", "awesome", "fantastic", "perfect", "best", "wonderful", "superb",
-      "brilliant", "outstanding", "cool", "happy", "satisfied", "pleasant", "impressive", "reliable", "smooth", "easy", "helpful", "beautiful",
-      "strong", "smart", "recommend", "premium","valuable", "efficient", "quick", "positive", "enjoy", "liked", "favorite", "delightful","super",
-      "fine","recommended","stylish","clear","stable","comfortable","nice"}
-
-    negative_words = {
-      "bad", "poor", "worst", "slow", "disappointing", "late", "hate","lately", "awful", "terrible", "horrible", "useless", "waste", "broken", "cheap","small", 
-      "cheaper","weak", "boring", "annoying", "hard","difficult", "problem","problems", "issue","issues", "error","errors", "bug","bugs","buggy", "lag","lagged",
-      "heating","delay","delayed","delays", "negative", "frustrating", "dirty", "ugly", "noisy","used","unclear","confusing","crash","crashes","crashed","expensive",
-      "slow","overpriced", "damaged","damages", "unreliable", "fail","failed", "poorly", "dislike", "regret", "pathetic", "mess","stopped","messy","unstable",
-      "heating","drains","limited","drained","low","heavy"}
-
-    words = text.split()
-
-    positive_count = sum(1 for word in words if word in positive_words)
-    negative_count = sum(1 for word in words if word in negative_words)
-   
-    if "but" in words and positive_count > 0:
-        return "mixed"
-    elif positive_count > 0 and negative_count > 0:
-        return "mixed"
-
-    elif pos > neg:
-        return "positive"
-
-    elif neg > pos:
-        return "negative"
-
-    else:
+    except Exception:
         return "neutral"
-    
-#LLM Enhancement 
+
 
 def smart_sentiment(text):
 
-    basic_sentiment = get_sentiment(text)
+    try:
 
-    prompt = f"""
-    You are a sentiment classifier.
+        base_sentiment = get_sentiment(text)
 
-    Text:
-    \"\"\"{text}\"\"\"
+        prompt = f"""
+You are a sentiment classifier.
 
-    Initial prediction:
-    {basic_sentiment}
+Text:
+\"\"\"{text}\"\"\"
 
-   Check if the prediction is correct.
+Initial prediction:
+{base_sentiment}
 
-    Return ONLY one word from:
-    positive, negative, neutral, mixed.
-    No explanation.
-    """
+Return ONLY one word:
+positive
+negative
+neutral
+mixed
+"""
 
-    llm_result = ask_llm(prompt)
+        llm_result = ask_llm(prompt)
 
-    if llm_result:
+        allowed = [
+            "positive",
+            "negative",
+            "neutral",
+            "mixed"
+        ]
 
-        llm_result = llm_result.strip().lower()
+        if llm_result:
 
-        allowed = ["positive","negative","neutral","mixed"]
+            llm_result = llm_result.strip().lower()
 
-        if llm_result in allowed:
+            if llm_result in allowed:
+                return llm_result
 
-            # Trust rule-based if already confident
-            if basic_sentiment in ["positive","negative","mixed"]:
-                return basic_sentiment
+        return base_sentiment
 
-            return llm_result
-
-    return basic_sentiment
+    except Exception:
+        return get_sentiment(text)

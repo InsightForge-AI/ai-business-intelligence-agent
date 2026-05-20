@@ -1,173 +1,131 @@
+import re
+
+from nlp.teamC.src.preprocessing import clean_text
 from nlp.teamC.src.llm import ask_llm
 
-import re
 
-
-def preprocess(text):
-
-    if not text or text.strip() == "":
-        return None
-
-    cleaned = text.lower()
-
-    # remove symbols except dot
-    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
-
-    cleaned = " ".join(cleaned.split())
-
-    return cleaned
-
-import re
-
-def summarize_text(text):
-    if not text or text.strip() == "":
-        return None
-
-    cleaned = text.lower()
-
-    # remove symbols except dot
-    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
-
-    cleaned = " ".join(cleaned.split())
-
-    return cleaned
+stop_words = {
+    "the", "is", "and", "a", "an",
+    "to", "of", "in", "on", "for",
+    "with", "this", "that", "it"
+}
 
 
 def summarize(text):
 
-    if not text or text.strip() == "":
-        return "No text provided"
+    try:
 
-    # Clean original text
-    clean_original = re.sub(
-        r'[^a-zA-Z0-9\s\.]',
-        ' ',
-        text
-    )
+        if not text:
+            return "No text provided"
 
-    clean_original = " ".join(clean_original.split())
+        original_sentences = re.split(r"[.!?]+", text)
 
-    # Split original sentences
-    original_sentences = re.split(
-        r'\.+\s*',
-        clean_original
-    )
+        original_sentences = [
+            s.strip()
+            for s in original_sentences
+            if s.strip()
+        ]
 
-    original_sentences = [
-        s.strip() for s in original_sentences
-        if s.strip()
-    ]
+        cleaned = clean_text(text)
 
-    cleaned_text = preprocess(text)
+        cleaned_sentences = re.split(r"[.!?]+", cleaned)
 
-    if not cleaned_text:
-        return "No text provided"
+        cleaned_sentences = [
+            s.strip()
+            for s in cleaned_sentences
+            if s.strip()
+        ]
 
-    # Use SAME splitting method
-    cleaned_sentences = re.split(
-        r'\.+\s*',
-        cleaned_text
-    )
+        if len(original_sentences) == 1:
+            return original_sentences[0]
 
-    cleaned_sentences = [
-        s.strip() for s in cleaned_sentences
-        if s.strip()
-    ]
+        word_freq = {}
 
-    total_sentences = len(original_sentences)
+        for sentence in cleaned_sentences:
 
-    # If only one sentence
-    if total_sentences == 1:
-        return original_sentences[0] + "."
+            words = sentence.split()
 
-    # Decide summary length dynamically
-    if total_sentences <= 2:
-        summary_length = 1
-    elif total_sentences <= 6:
-        summary_length = 3
-    elif total_sentences <= 10:
-        summary_length = 5
-    else:
-        summary_length = 6
+            for word in words:
 
-    stop_words = [
-        "the", "is", "and", "but",
-        "a", "an", "to", "of",
-        "in", "on", "for", "with",
-        "at", "by", "this", "that",
-        "however", "overall"
-    ]
+                if word not in stop_words:
 
-    # Word frequency
-    word_freq = {}
+                    word_freq[word] = (
+                        word_freq.get(word, 0) + 1
+                    )
 
-    for sentence in cleaned_sentences:
+        sentence_scores = {}
 
-        words = sentence.split()
+        for i, sentence in enumerate(cleaned_sentences):
 
-        for word in words:
+            words = sentence.split()
 
-            if word not in stop_words:
-                word_freq[word] = word_freq.get(word, 0) + 1
+            if not words:
+                continue
 
-    # Score sentences
-    sentence_scores = {}
+            score = 0
 
-    for i in range(len(cleaned_sentences)):
+            for word in words:
 
-        words = cleaned_sentences[i].split()
+                if word in word_freq:
+                    score += word_freq[word]
 
-        score = 0
+            # normalize score
+            score = score / len(words)
 
-        for word in words:
+            # slight importance to first sentence
+            if i == 0:
+                score += 1
 
-            if word in word_freq:
-                score += word_freq[word]
+            sentence_scores[i] = score
 
-        # Give slight importance to first sentence
-        if i == 0:
-            score += 2
+        ranked = sorted(
+            sentence_scores,
+            key=sentence_scores.get,
+            reverse=True
+        )
 
-    # remove special characters
-    clean_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
+        top_n = min(3, len(ranked))
 
-    # remove extra spaces
-    clean_text = " ".join(clean_text.split())
+        selected_indexes = sorted(ranked[:top_n])
 
-    # Capitalize first letter (optional)
-    clean_text = clean_text.strip()
+        selected_sentences = [
+            original_sentences[i]
+            for i in selected_indexes
+        ]
 
-    # Safe indexing fix
-    selected_sentences = [
-        original_sentences[i]
-        for i in top_indexes
-        if i < len(original_sentences)
-    ]
+        return ". ".join(selected_sentences) + "."
 
-    return ". ".join(selected_sentences) + "."
+    except Exception:
+        return "Summary generation failed"
 
 
 def smart_summary(text):
 
-    basic_summary = summarize(text)
+    try:
 
-    prompt = f"""
+        base_summary = summarize(text)
+
+        prompt = f"""
 You are a text summarization assistant.
-Rules:
-- Return only summary text
-- No Labels
-- No explanations
 
 Text:
 \"\"\"{text}\"\"\"
 
 Initial summary:
-{basic_summary}
+{base_summary}
+
+Rules:
+- Improve readability
+- Keep concise
+- No explanation
 """
 
-    llm_result = ask_llm(prompt)
+        llm_result = ask_llm(prompt)
 
-    if llm_result:
-        return llm_result
+        if llm_result:
+            return llm_result.strip()
 
-    return basic_summary
+        return base_summary
+
+    except Exception:
+        return summarize(text)
