@@ -1,5 +1,3 @@
-from modules.extractor import extract_text
-
 from modules.sentiment import (
     get_sentiment,
     smart_sentiment
@@ -16,10 +14,8 @@ from modules.summarizer import (
 )
 
 
-def process_file(file_path):
+def process_text(text):
 
-    # Extract text
-    text = extract_text(file_path)
 
     # Stable results
     base_sentiment = get_sentiment(text)
