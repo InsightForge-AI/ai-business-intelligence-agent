@@ -1,33 +1,23 @@
-from fastapi import FastAPI, UploadFile, File
-import os
-import uuid
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-from processor import process_file
+from processor import process_text
 
 app = FastAPI()
 
-BASE_DIR = os.path.dirname(__file__)
-UPLOAD_DIR = os.path.join(BASE_DIR, "tests")
-
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
+class NLPRequest(BaseModel):
+    query: str 
+    content: str
 
 @app.post("/nlp/analyze")
-async def analyze_file(file: UploadFile = File(...)):
+async def analyze_file(request: NLPRequest):
 
     try:
 
-        unique_name = f"{uuid.uuid4()}_{file.filename}"
-
-        temp_path = os.path.join(
-            UPLOAD_DIR,
-            unique_name
+    
+        result = process_text(
+            request.content
         )
-
-        with open(temp_path, "wb") as f:
-            f.write(await file.read())
-
-        result = process_file(temp_path)
 
         return result
 
