@@ -1,34 +1,20 @@
 from modules.llm_enhancer import ask_llm
-
+from modules.prompts import summary_prompt
 import re
 
 
 def preprocess(text):
 
-    if not text or text.strip() == "":
+    if not text or not str(text).strip():
         return None
 
     cleaned = text.lower()
 
-    # remove symbols except dot
-    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
-
-    cleaned = " ".join(cleaned.split())
-
-    return cleaned
-
-import re
-
-
-def preprocess(text):
-
-    if not text or text.strip() == "":
-        return None
-
-    cleaned = text.lower()
-
-    # remove symbols except dot
-    cleaned = re.sub(r'[^a-z0-9\s\.]', ' ', cleaned)
+    cleaned = re.sub(
+        r'[^a-z0-9\s\.]',
+        ' ',
+        cleaned
+    )
 
     cleaned = " ".join(cleaned.split())
 
@@ -37,10 +23,12 @@ def preprocess(text):
 
 def summarize(text):
 
-    if not text or text.strip() == "":
+   # Core extractive summarizer
+
+
+    if not text or not str(text).strip():
         return "No text provided"
 
-    # Clean original text
     clean_original = re.sub(
         r'[^a-zA-Z0-9\s\.]',
         ' ',
@@ -49,14 +37,14 @@ def summarize(text):
 
     clean_original = " ".join(clean_original.split())
 
-    # Split original sentences
     original_sentences = re.split(
         r'\.+\s*',
         clean_original
     )
 
     original_sentences = [
-        s.strip() for s in original_sentences
+        s.strip()
+        for s in original_sentences
         if s.strip()
     ]
 
@@ -65,114 +53,179 @@ def summarize(text):
     if not cleaned_text:
         return "No text provided"
 
-    # Use SAME splitting method
     cleaned_sentences = re.split(
         r'\.+\s*',
         cleaned_text
     )
 
     cleaned_sentences = [
-        s.strip() for s in cleaned_sentences
+        s.strip()
+        for s in cleaned_sentences
         if s.strip()
     ]
 
     total_sentences = len(original_sentences)
 
-    # If only one sentence
-    if total_sentences == 1:
-        return original_sentences[0] + "."
+    if total_sentences <= 1:
+        return (
+            original_sentences[0] + "."
+            if original_sentences
+            else "No text provided"
+        )
 
-    # Decide summary length dynamically
-    if total_sentences <= 2:
-        summary_length = 1
-    elif total_sentences <= 6:
-        summary_length = 3
-    elif total_sentences <= 10:
-        summary_length = 5
-    else:
-        summary_length = 6
+    summary_length = max(
+        3,
+        min(
+            round(total_sentences * 0.30),
+            40
+        )
+    )
 
-    stop_words = [
+    stop_words = {
         "the", "is", "and", "but",
         "a", "an", "to", "of",
         "in", "on", "for", "with",
         "at", "by", "this", "that",
+        "these", "those", "it",
+        "its", "was", "were",
+        "are", "be", "been",
+        "being", "as", "from",
+        "or", "if", "into",
+        "about", "over", "under",
+        "between", "during",
         "however", "overall"
-    ]
+    }
 
-    # Word frequency
     word_freq = {}
 
     for sentence in cleaned_sentences:
 
-        words = sentence.split()
-
-        for word in words:
+        for word in sentence.split():
 
             if word not in stop_words:
-                word_freq[word] = word_freq.get(word, 0) + 1
 
-    # Score sentences
+                word_freq[word] = (
+                    word_freq.get(word, 0) + 1
+                )
+
     sentence_scores = {}
 
-    for i in range(len(cleaned_sentences)):
+    for i, sentence in enumerate(cleaned_sentences):
 
-        words = cleaned_sentences[i].split()
+        words = sentence.split()
 
-        score = 0
+        if not words:
+            continue
 
-        for word in words:
+        score = sum(
+            word_freq.get(word, 0)
+            for word in words
+        )
 
-            if word in word_freq:
-                score += word_freq[word]
+        score = score / len(words)
 
-        # Give slight importance to first sentence
         if i == 0:
             score += 2
 
         sentence_scores[i] = score
 
-    # Pick top scored sentences
     top_indexes = sorted(
         sentence_scores,
         key=sentence_scores.get,
         reverse=True
     )[:summary_length]
 
-    # Keep original order
     top_indexes = sorted(top_indexes)
 
-    # Safe indexing fix
     selected_sentences = [
         original_sentences[i]
         for i in top_indexes
         if i < len(original_sentences)
     ]
 
+    selected_sentences = list(
+        dict.fromkeys(selected_sentences)
+    )
+
     return ". ".join(selected_sentences) + "."
+
+
+def get_summary(text):
+    
+    # Handles small and large documents
+    
+
+    if not text or not str(text).strip():
+        return "No text provided"
+
+    sentences = re.split(
+        r'\.+\s*',
+        text
+    )
+
+    sentences = [
+        s.strip()
+        for s in sentences
+        if s.strip()
+    ]
+
+    # Small document
+    if len(sentences) <= 100:
+        return summarize(text)
+
+    # Large document
+    chunk_size = 100
+
+    chunks = []
+
+    for i in range(
+        0,
+        len(sentences),
+        chunk_size
+    ):
+
+        chunk = ". ".join(
+            sentences[i:i + chunk_size]
+        )
+
+        chunks.append(chunk)
+
+    chunk_summaries = []
+
+    for chunk in chunks:
+
+        chunk_summaries.append(
+            summarize(chunk)
+        )
+
+    combined_summary = ". ".join(
+        chunk_summaries
+    )
+
+    return summarize(combined_summary)
 
 
 def smart_summary(text):
 
-    basic_summary = summarize(text)
+    base_summary = get_summary(text)
+    
+    if base_summary == "No text provided":
+        return "No text provided"
 
-    prompt = f"""
-You are a text summarization assistant.
-Rules:
-- Return only summary text
-- No Labels
-- No explanations
+    prompt = summary_prompt(base_summary)
+ 
+    try:
 
-Text:
-\"\"\"{text}\"\"\"
+        llm_result = ask_llm(prompt)
 
-Initial summary:
-{basic_summary}
-"""
+        if (
+            llm_result
+            and isinstance(llm_result, str)
+            and llm_result.strip()
+        ):
+            return llm_result.strip()
 
-    llm_result = ask_llm(prompt)
+    except Exception:
+        pass
 
-    if llm_result:
-        return llm_result
-
-    return basic_summary
+    return base_summary
