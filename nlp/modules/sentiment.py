@@ -2,93 +2,223 @@ import re
 from modules.llm_enhancer import ask_llm
 
 
+POSITIVE_WORDS = {
+    # General Positive
+    "good", "great", "excellent", "amazing", "nice", "worth",
+    "fast", "love", "awesome", "fantastic", "perfect", "best",
+    "wonderful", "superb", "brilliant", "outstanding", "cool",
+    "happy", "satisfied", "pleasant", "impressive", "reliable",
+    "smooth", "easy", "helpful", "beautiful", "strong", "smart",
+    "recommend", "recommended", "premium", "valuable",
+    "efficient", "quick", "positive", "enjoy", "liked",
+    "favorite", "delightful", "super", "fine", "stylish",
+    "clear", "stable", "comfortable",
+
+    # Business Positive
+    "growth", "growing",
+    "profit", "profits", "profitable",
+    "revenue", "revenues",
+    "gain", "gains",
+    "increase", "increased",
+    "improvement", "improved",
+    "success", "successful",
+    "opportunity", "opportunities",
+    "expansion", "expanded",
+    "innovation", "innovative",
+    "productive", "productivity",
+    "achievement", "achievements",
+    "competitive", "leader", "leadership",
+    "performance", "performing",
+    "boost", "boosted"
+}
+
+
+NEGATIVE_WORDS = {
+    # General Negative
+    "bad", "poor", "worst", "slow", "disappointing", "late",
+    "hate", "awful", "terrible", "horrible", "useless",
+    "waste", "broken", "weak", "boring", "annoying",
+    "hard", "difficult", "problem", "problems", "issue",
+    "issues", "error", "errors", "bug", "bugs", "buggy",
+    "lag", "lagged", "heating", "delay", "delayed",
+    "delays", "negative", "frustrating", "dirty", "ugly",
+    "noisy", "unclear", "confusing", "crash", "crashes",
+    "crashed", "expensive", "overpriced", "damaged",
+    "damages", "unreliable", "fail", "failed", "poorly",
+    "dislike", "regret", "pathetic", "mess", "stopped",
+    "messy", "unstable", "drains", "limited", "drained",
+
+    # Business Negative
+    "loss", "losses",
+    "decline", "declined",
+    "decrease", "decreased",
+    "drop", "dropped",
+    "risk", "risks",
+    "debt", "debts",
+    "failure", "failing",
+    "bankruptcy", "bankrupt",
+    "challenge", "challenges",
+    "threat", "threats",
+    "downturn", "shortage",
+    "inflation", "recession",
+    "weakness",
+    "penalty", "penalties",
+    "lawsuit", "lawsuits"
+}
+
+
+NEGATION_WORDS = {"not", "never", "no"}
+
+
 def preprocess_text(text):
-    
+    """
+    Clean and normalize text.
+    """
+
     if not text or not str(text).strip():
         return ""
 
     text = str(text).lower()
-    text = re.sub(r"[^a-z0-9\s]", " ", text)   # remove symbols
-    text = re.sub(r"\s+", " ", text).strip()   # remove extra spaces
+
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
     return text
 
 
 def get_sentiment(text):
-   
+    """
+    Rule-based sentiment analysis.
+
+    Returns:
+        positive
+        negative
+        neutral
+        mixed
+    """
+
     text = preprocess_text(text)
 
     if not text:
         return "neutral"
 
-    positive_words = {
-      "good", "great", "excellent", "amazing", "nice", "worth", "fast", "love", "awesome", "fantastic", "perfect", "best", "wonderful", "superb",
-      "brilliant", "outstanding", "cool", "happy", "satisfied", "pleasant", "impressive", "reliable", "smooth", "easy", "helpful", "beautiful",
-      "strong", "smart", "recommend", "premium","valuable", "efficient", "quick", "positive", "enjoy", "liked", "favorite", "delightful","super",
-      "fine","recommended","stylish","clear","stable","comfortable","nice"}
-
-    negative_words = {
-      "bad", "poor", "worst", "slow", "disappointing", "late", "hate","lately", "awful", "terrible", "horrible", "useless", "waste", "broken", "cheap","small", 
-      "cheaper","weak", "boring", "annoying", "hard","difficult", "problem","problems", "issue","issues", "error","errors", "bug","bugs","buggy", "lag","lagged",
-      "heating","delay","delayed","delays", "negative", "frustrating", "dirty", "ugly", "noisy","used","unclear","confusing","crash","crashes","crashed","expensive",
-      "slow","overpriced", "damaged","damages", "unreliable", "fail","failed", "poorly", "dislike", "regret", "pathetic", "mess","stopped","messy","unstable",
-      "heating","drains","limited","drained","low","heavy"}
-
     words = text.split()
 
-    positive_count = sum(1 for word in words if word in positive_words)
-    negative_count = sum(1 for word in words if word in negative_words)
-   
-    if "but" in words and positive_count > 0:
+    positive_count = 0
+    negative_count = 0
+
+    skip_next = False
+
+    for i, word in enumerate(words):
+
+        if skip_next:
+            skip_next = False
+            continue
+
+        # Handle negations
+        if (
+            word in NEGATION_WORDS
+            and i + 1 < len(words)
+        ):
+
+            next_word = words[i + 1]
+
+            if next_word in POSITIVE_WORDS:
+                negative_count += 1
+                skip_next = True
+                continue
+
+            elif next_word in NEGATIVE_WORDS:
+                positive_count += 1
+                skip_next = True
+                continue
+
+        # Normal counting
+        if word in POSITIVE_WORDS:
+            positive_count += 1
+
+        elif word in NEGATIVE_WORDS:
+            negative_count += 1
+
+    # Final sentiment
+    if positive_count > 0 and negative_count > 0:
         return "mixed"
-    elif positive_count > 0 and negative_count > 0:
-        return "mixed"
+
     elif positive_count > negative_count:
-        if "not" in words:
-            return "negative"
         return "positive"
+
     elif negative_count > positive_count:
-        if "not" in words:
-            return "positive"
         return "negative"
-    else:
-        return "neutral"
-    
-#LLM Enhancement 
+
+    return "neutral"
+
 
 def smart_sentiment(text):
+    """
+    LLM-enhanced sentiment analysis.
+
+    Flow:
+    1. Run rule-based sentiment.
+    2. Send text + rule-based prediction to LLM.
+    3. If LLM returns valid label -> use it.
+    4. Else return rule-based result.
+    """
 
     basic_sentiment = get_sentiment(text)
 
     prompt = f"""
-    You are a sentiment classifier.
+You are an expert sentiment classifier.
 
-    Text:
-    \"\"\"{text}\"\"\"
+Classify the sentiment of the given text into exactly ONE label:
 
-    Initial prediction:
-    {basic_sentiment}
+positive
+negative
+neutral
+mixed
 
-   Check if the prediction is correct.
+Text:
+\"\"\"{text}\"\"\"
 
-    Return ONLY one word from:
-    positive, negative, neutral, mixed.
-    No explanation.
-    """
+Rule-based prediction:
+{basic_sentiment}
 
-    llm_result = ask_llm(prompt)
+The rule-based prediction may or may not be correct.
+Analyze the text yourself and return the most accurate label.
 
-    if llm_result:
+Rules:
+- If both positive and negative opinions are present, return mixed.
+- If the overall tone is positive, return positive.
+- If the overall tone is negative, return negative.
+- If there is no clear sentiment, return neutral.
 
-        llm_result = llm_result.strip().lower()
+Return ONLY one word:
+positive
+negative
+neutral
+mixed
 
-        allowed = ["positive","negative","neutral","mixed"]
+No explanation.
+"""
 
-        if llm_result in allowed:
+    try:
 
-            # Trust rule-based if already confident
-            if basic_sentiment in ["positive","negative","mixed"]:
-                return basic_sentiment
+        llm_result = ask_llm(prompt)
 
-            return llm_result
+        if llm_result:
+
+            llm_result = llm_result.strip().lower()
+
+            allowed = {
+                "positive",
+                "negative",
+                "neutral",
+                "mixed"
+            }
+
+            if llm_result in allowed:
+                return llm_result
+
+    except Exception:
+        pass
 
     return basic_sentiment
