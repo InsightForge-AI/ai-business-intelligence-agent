@@ -1,6 +1,6 @@
 import re
 from modules.llm_enhancer import ask_llm
-
+from modules.prompts import sentiment_prompt
 
 POSITIVE_WORDS = {
     # General Positive
@@ -9,27 +9,16 @@ POSITIVE_WORDS = {
     "wonderful", "superb", "brilliant", "outstanding", "cool",
     "happy", "satisfied", "pleasant", "impressive", "reliable",
     "smooth", "easy", "helpful", "beautiful", "strong", "smart",
-    "recommend", "recommended", "premium", "valuable",
-    "efficient", "quick", "positive", "enjoy", "liked",
-    "favorite", "delightful", "super", "fine", "stylish",
-    "clear", "stable", "comfortable",
+    "recommend", "recommended", "premium", "valuable", "efficient",
+    "quick", "positive", "enjoy", "liked", "favorite", "delightful",
+    "super", "fine", "stylish","clear", "stable", "comfortable",
 
     # Business Positive
-    "growth", "growing",
-    "profit", "profits", "profitable",
-    "revenue", "revenues",
-    "gain", "gains",
-    "increase", "increased",
-    "improvement", "improved",
-    "success", "successful",
-    "opportunity", "opportunities",
-    "expansion", "expanded",
-    "innovation", "innovative",
-    "productive", "productivity",
-    "achievement", "achievements",
-    "competitive", "leader", "leadership",
-    "performance", "performing",
-    "boost", "boosted"
+    "growth", "growing","profit", "profits", "profitable","revenue", "revenues",
+    "gain", "gains", "increase", "increased", "improvement", "improved",
+    "success", "successful","opportunity", "opportunities","expansion", "expanded",
+    "innovation", "innovative","productive", "productivity","achievement", "achievements",
+    "competitive", "leader", "leadership","performance", "performing","boost", "boosted"
 }
 
 
@@ -49,21 +38,11 @@ NEGATIVE_WORDS = {
     "messy", "unstable", "drains", "limited", "drained",
 
     # Business Negative
-    "loss", "losses",
-    "decline", "declined",
-    "decrease", "decreased",
-    "drop", "dropped",
-    "risk", "risks",
-    "debt", "debts",
-    "failure", "failing",
-    "bankruptcy", "bankrupt",
-    "challenge", "challenges",
-    "threat", "threats",
-    "downturn", "shortage",
-    "inflation", "recession",
-    "weakness",
-    "penalty", "penalties",
-    "lawsuit", "lawsuits"
+    "loss", "losses","decline", "declined","decrease", "decreased",
+    "drop", "dropped","risk", "risks","debt", "debts","failure", "failing",
+    "bankruptcy", "bankrupt","challenge", "challenges","threat", "threats",
+    "downturn", "shortage","inflation", "recession","weakness",
+    "penalty", "penalties","lawsuit", "lawsuits"
 }
 
 
@@ -71,9 +50,7 @@ NEGATION_WORDS = {"not", "never", "no"}
 
 
 def preprocess_text(text):
-    """
-    Clean and normalize text.
-    """
+    
 
     if not text or not str(text).strip():
         return ""
@@ -87,15 +64,7 @@ def preprocess_text(text):
 
 
 def get_sentiment(text):
-    """
-    Rule-based sentiment analysis.
-
-    Returns:
-        positive
-        negative
-        neutral
-        mixed
-    """
+    
 
     text = preprocess_text(text)
 
@@ -166,39 +135,7 @@ def smart_sentiment(text):
 
     basic_sentiment = get_sentiment(text)
 
-    prompt = f"""
-You are an expert sentiment classifier.
-
-Classify the sentiment of the given text into exactly ONE label:
-
-positive
-negative
-neutral
-mixed
-
-Text:
-\"\"\"{text}\"\"\"
-
-Rule-based prediction:
-{basic_sentiment}
-
-The rule-based prediction may or may not be correct.
-Analyze the text yourself and return the most accurate label.
-
-Rules:
-- If both positive and negative opinions are present, return mixed.
-- If the overall tone is positive, return positive.
-- If the overall tone is negative, return negative.
-- If there is no clear sentiment, return neutral.
-
-Return ONLY one word:
-positive
-negative
-neutral
-mixed
-
-No explanation.
-"""
+    prompt = sentiment_prompt(text, basic_sentiment)
 
     try:
 
