@@ -34,7 +34,7 @@ async def analyze_file(request: NLPRequest):
             }
         return result
     
-    except Exception:
+    except Exception as e:
         print(f"NLP Error: {e}")
         
         return {
