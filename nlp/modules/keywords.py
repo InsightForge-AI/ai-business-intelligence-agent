@@ -1,3 +1,4 @@
+import re
 from modules.llm_enhancer import ask_llm
 from modules.prompts import keyword_prompt
 import re
@@ -104,9 +105,9 @@ def get_keywords(text):
     if not keywords:
         return ["No keywords found"]
 
-    return keywords
+# LLM Enhancement Layer
 
-#LLM Enhancement
+
 
 def smart_keywords(text):
     
