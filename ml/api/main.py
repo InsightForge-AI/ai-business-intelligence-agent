@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from ml.teamA.src.analysis import analyze
+from ml.src.analysis import analyze
 
 
 app = FastAPI()

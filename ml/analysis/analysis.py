@@ -2,8 +2,8 @@ import json
 import re
 import pandas as pd
 
-from ml.teamA.llm.llm_service import call_llm
-from ml.teamA.prompts.prompts import build_prompt
+from ml.llm.llm_service import call_llm
+from ml.prompts.prompts import build_prompt
 
 
 HARDCODED_FILE_PATH = "ml/teamA/tests/sample_sales.csv"
