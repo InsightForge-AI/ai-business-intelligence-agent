@@ -15,11 +15,11 @@ def call_llm(model: str, prompt: str):
                 "prompt": prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.2,
+                    "temperature": 0.1,
                     "num_predict": 1000
                 }
             },
-            timeout=120
+            timeout=600
         )
 
         response.raise_for_status()
@@ -32,6 +32,6 @@ def call_llm(model: str, prompt: str):
         print("LLM Request Error:", e)
         return None
 
-    except ValueError as e:
-        print("Invalid JSON Response:", e)
+    except (ValueError, KeyError) as e:
+        print("Invalid Response:", e)
         return None
