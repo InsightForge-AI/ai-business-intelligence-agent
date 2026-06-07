@@ -1,30 +1,48 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Optional
+
 
 from processor import process_text
 
 app = FastAPI()
 
 class NLPRequest(BaseModel):
-    query: str 
-    content: str
+    text: Optional[str] = None
+    query: Optional[str] = None
 
 @app.post("/nlp/analyze")
 async def analyze_file(request: NLPRequest):
 
     try:
+        
+        # Only text
+        if request.text:
+            result = process_text(request.text)
 
-    
-        result = process_text(
-            request.content
-        )
+        # Only query
+        elif request.query:
+            result = process_text(request.query)
 
+        # Nothing provided
+        else:
+            return {
+                "sentiment": "neutral",
+                "summary": "No query or text provided",
+                "keywords": [],
+                "recommendations":[]
+            }
         return result
-
-    except Exception:
-
+    
+    except Exception as e:
+        print(f"NLP Error: {e}")
+        
         return {
             "sentiment": "neutral",
             "summary": "processing error",
-            "keywords": []
+            "keywords": [],
+            "recommendations":[]
+
         }
+
+      
