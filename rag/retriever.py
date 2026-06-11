@@ -24,7 +24,7 @@ embedding_model = (
 
 TOP_K = 5
 
-MIN_SCORE = 0.50
+MIN_SCORE = 0.20
 
 
 # ----------------------------------
