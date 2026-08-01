@@ -1,30 +1,71 @@
+"""
+==========================================================
+DocuMind NLP Service
+==========================================================
+
+Main FastAPI application.
+"""
+
 from fastapi import FastAPI
-from pydantic import BaseModel
 
-from processor import process_text
+from api.health import router as health_router
+from api.routes import router as nlp_router
 
-app = FastAPI()
+from utils.constants import (
+    SERVICE_NAME,
+    VERSION
+)
 
-class NLPRequest(BaseModel):
-    query: str 
-    content: str
 
-@app.post("/nlp/analyze")
-async def analyze_file(request: NLPRequest):
+app = FastAPI(
 
-    try:
+    title=SERVICE_NAME,
 
-    
-        result = process_text(
-            request.content
-        )
+    version=VERSION,
 
-        return result
+    description="DocuMind NLP Microservice"
 
-    except Exception:
+)
 
-        return {
-            "sentiment": "neutral",
-            "summary": "processing error",
-            "keywords": []
-        }
+# ---------------------------------------------------------
+# Register Routes
+# ---------------------------------------------------------
+
+app.include_router(
+
+    health_router,
+
+    tags=["Health"]
+
+)
+
+app.include_router(
+
+    nlp_router,
+
+    prefix="/nlp",
+
+    tags=["NLP"]
+
+)
+
+
+# ---------------------------------------------------------
+# Root Endpoint
+# ---------------------------------------------------------
+
+@app.get("/")
+async def root():
+    """
+    Root endpoint.
+    """
+
+    return {
+
+        "service": SERVICE_NAME,
+
+        "version": VERSION,
+
+        "status": "running"
+
+    }
