@@ -6,7 +6,7 @@ I'm Raghuvaran (you can find my GitHub profile here: [raghuvaranlokati](https://
 
 I came across your project this evening while having a cup of coffee. First of all, your **core concept is really good** and very unique!
 
-But, I want to give a friendly suggestion. Right now, the project structure looks **very basic and simple**. My worry is that if you release it like this in production, **someone can easily copy it** and make a much more advanced version very fast. If they improve on your base, they will go far ahead, and it might take your team **years to catch up** to them.
+But, I want to give a friendly suggestion. Right now, the project structure looks **very basic and simple**. My worry is that if you release it like this in production, **someone can easily copy it** (or like me 😅) and make a much more advanced version very fast. If they improve on your base, they will go far ahead, and it might take your team **years to catch up** to them.
 
 You have a **brilliant idea**. To protect it and take it to the next level, I strongly suggest planning a **strong and advanced architecture**. This will help you stay ahead of anyone trying to copy. Please take this as a compliment for your great idea and a suggestion to make it **even better**!
 
