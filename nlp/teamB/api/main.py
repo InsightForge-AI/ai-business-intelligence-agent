@@ -52,7 +52,9 @@ def analyze_text(data: dict):
             "keywords": keywords_result,
         }
 
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.error(f"Error during NLP analysis: {e}", exc_info=True)
 
         # fallback response (never crash)
 
