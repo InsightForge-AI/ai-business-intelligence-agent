@@ -96,8 +96,10 @@ async def run_analysis(
     # -----------------------------------------------------
     # Build Vector Index
     # -----------------------------------------------------
+    # Held as a local variable, not shared module state -- see
+    # analysis/vector_store.py for why that matters under concurrency.
 
-    build_index(
+    index = build_index(
 
         chunks,
 
@@ -124,6 +126,8 @@ async def run_analysis(
     # -----------------------------------------------------
 
     retrieved_chunks = retrieve_chunks(
+
+        index=index,
 
         query_embedding=query_embedding,
 

@@ -108,15 +108,6 @@ async def generate_document_summary(document):
 
 
 
-        print("\n========== NLP RESPONSE ==========")
-
-        print(result)
-
-        print("==================================\n")
-
-
-
-
         logger.info(
 
             f"NLP Response: {result}"

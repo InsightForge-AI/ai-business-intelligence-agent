@@ -37,3 +37,8 @@ dist/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Runtime storage (recreated on startup by backend/config/settings.py)
+backend/storage/uploads/
+backend/storage/temp_uploads/
+backend/storage/metadata/

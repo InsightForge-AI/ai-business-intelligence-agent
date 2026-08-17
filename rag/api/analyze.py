@@ -21,16 +21,6 @@ router = APIRouter()
 @router.post("/analyze", response_model=RAGResponse)
 async def analyze(request: RAGRequest):
 
-    print("\n" + "=" * 80)
-    print("RAG REQUEST")
-    print("=" * 80)
-    print("Query:", request.query)
-    print("Content Length:", len(request.content))
-    print("Content Preview:")
-    print(request.content[:1000])
-    print("Metadata:", request.metadata)
-    print("=" * 80)
-
     try:
         response = await run_analysis(
             query=request.query,

@@ -59,11 +59,6 @@ async def run_rag(
 
     )
 
-    print("\n========== RAG PAYLOAD ==========")
-    print(payload)
-    print(type(payload["content"]))
-    print("=================================\n")
-
     try:
 
         async with httpx.AsyncClient(
@@ -79,11 +74,6 @@ async def run_rag(
                 json=payload
 
             )
-
-        print("\n========== RAG RESPONSE ==========")
-        print(response.status_code)
-        print(response.text)
-        print("==================================\n")
 
         response.raise_for_status()
 

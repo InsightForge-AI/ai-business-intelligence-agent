@@ -5,22 +5,32 @@ Vector Store
 
 Responsibilities
 ----------------
-• Store chunk embeddings
-• Maintain in-memory vector index
+• Build an in-memory vector index for a single document's chunks
 • Preserve chunk metadata
+
+No AI logic.
 """
 
 from typing import List, Dict
-
-VECTOR_STORE: List[Dict] = []
 
 
 def build_index(
     chunks: list,
     embeddings: list[list[float]]
-):
+) -> List[Dict]:
     """
-    Build in-memory vector index.
+    Build an in-memory vector index for one document's chunks.
+
+    Returns the index as a plain list -- it is NOT stored in any shared
+    module-level state. An earlier version kept a single global
+    VECTOR_STORE list that every call to build_index() cleared and
+    replaced; under any concurrent usage (two documents processed by
+    overlapping requests in the same process, which orchestration's
+    `await generate_embeddings(...)` call makes reachable, not just
+    theoretical) one document's retrieval could silently return another
+    document's chunks. Callers (see services/rag_service.py) must now
+    hold the returned index themselves and pass it to retrieve_chunks(),
+    so each request's data stays request-scoped.
 
     Parameters
     ----------
@@ -29,9 +39,13 @@ def build_index(
 
     embeddings : list
         List of embedding vectors.
+
+    Returns
+    -------
+    list[dict]
     """
 
-    VECTOR_STORE.clear()
+    index: List[Dict] = []
 
     for chunk, embedding in zip(chunks, embeddings):
 
@@ -40,7 +54,7 @@ def build_index(
 
         if isinstance(chunk, dict):
 
-            VECTOR_STORE.append({
+            index.append({
 
                 "chunk_id": chunk.get(
                     "chunk_id"
@@ -72,7 +86,7 @@ def build_index(
 
         else:
 
-            VECTOR_STORE.append({
+            index.append({
 
                 "chunk_id": None,
 
@@ -88,26 +102,4 @@ def build_index(
 
             })
 
-
-def get_index() -> list:
-    """
-    Return vector index.
-    """
-
-    return VECTOR_STORE
-
-
-def clear_index():
-    """
-    Clear vector store.
-    """
-
-    VECTOR_STORE.clear()
-
-
-def index_size() -> int:
-    """
-    Return number of indexed chunks.
-    """
-
-    return len(VECTOR_STORE)
+    return index

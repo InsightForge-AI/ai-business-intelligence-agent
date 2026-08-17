@@ -3,10 +3,16 @@ import os
 
 
 from services.extraction_service import extract_document
+from config.settings import METADATA_DIRECTORY
+from utils.validator import validate_document_id
 
 
 
-METADATA_PATH = "storage/metadata"
+# Anchored to config.settings.BASE_DIR (not the process's CWD, which
+# varies depending on how this service is launched -- run.py, a direct
+# uvicorn invocation, or a test runner) so metadata is always found in
+# the same place regardless of invocation context.
+METADATA_PATH = str(METADATA_DIRECTORY)
 
 
 
@@ -27,6 +33,10 @@ async def get_document(
 
 ):
 
+    try:
+        document_id = validate_document_id(document_id)
+    except ValueError:
+        return None
 
     metadata_file = os.path.join(
 
@@ -124,6 +134,10 @@ async def save_document_summary(
 
 ):
 
+    try:
+        document_id = validate_document_id(document_id)
+    except ValueError:
+        return False
 
     metadata_file = os.path.join(
 
@@ -220,6 +234,10 @@ async def save_document_analysis(
 
 ):
 
+    try:
+        document_id = validate_document_id(document_id)
+    except ValueError:
+        return False
 
     metadata_file = os.path.join(
 

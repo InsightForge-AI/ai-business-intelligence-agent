@@ -88,13 +88,21 @@ async def run_cv(
 
         )
 
-        raise RuntimeError(
+        # A dict (not a raised exception) so aggregation_service.py can
+        # attribute this failure to "cv" specifically -- an exception
+        # propagated through asyncio.gather(return_exceptions=True) loses
+        # which module it came from and gets logged as "unknown".
+        return {
 
-            f"CV API Error: {exc.response.status_code}"
+            "module": "cv",
 
-        ) from exc
+            "success": False,
 
-    except httpx.RequestError as exc:
+            "message": f"CV API Error: {exc.response.status_code}"
+
+        }
+
+    except httpx.RequestError:
 
         logger.exception(
 
@@ -102,8 +110,12 @@ async def run_cv(
 
         )
 
-        raise RuntimeError(
+        return {
 
-            "CV Service is unavailable."
+            "module": "cv",
 
-        ) from exc
+            "success": False,
+
+            "message": "CV Service is unavailable."
+
+        }

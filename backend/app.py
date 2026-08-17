@@ -49,13 +49,18 @@ app = FastAPI(
 # CORS
 # ---------------------------------------------------------
 
+# allow_credentials is intentionally False: combining a wildcard origin
+# with allow_credentials=True makes Starlette reflect back *any* request
+# Origin verbatim with credentials allowed, i.e. no real CORS protection.
+# No frontend exists yet on this branch to pin allow_origins to a known
+# value -- once one does, replace "*" with its actual origin(s).
 app.add_middleware(
 
     CORSMiddleware,
 
     allow_origins=["*"],
 
-    allow_credentials=True,
+    allow_credentials=False,
 
     allow_methods=["*"],
 

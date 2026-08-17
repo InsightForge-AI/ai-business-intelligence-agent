@@ -275,25 +275,10 @@ async def run_ml(
 
 
 
-    print(
-
-        "\n========== ML PAYLOAD =========="
-
-    )
 
 
-    print(
-
-        metadata
-
-    )
 
 
-    print(
-
-        "================================\n"
-
-    )
 
 
 
@@ -334,32 +319,12 @@ async def run_ml(
 
 
 
-        print(
-
-            "\n========== ML RESPONSE =========="
-
-        )
 
 
-        print(
-
-            response.status_code
-
-        )
 
 
-        print(
-
-            response.text
-
-        )
 
 
-        print(
-
-            "=================================\n"
-
-        )
 
 
 

@@ -15,7 +15,9 @@ import json
 from fastapi import APIRouter, HTTPException
 
 
+from config.settings import METADATA_DIRECTORY, UPLOAD_DIRECTORY
 from utils.logger import logger
+from utils.validator import validate_document_id
 
 
 
@@ -25,9 +27,9 @@ router = APIRouter()
 
 
 
-METADATA_PATH = "storage/metadata"
+METADATA_PATH = str(METADATA_DIRECTORY)
 
-UPLOAD_PATH = "storage/uploads"
+UPLOAD_PATH = str(UPLOAD_DIRECTORY)
 
 
 
@@ -59,7 +61,10 @@ async def delete_document(
 
         )
 
-
+        try:
+            document_id = validate_document_id(document_id)
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Document not found")
 
 
 

@@ -27,7 +27,8 @@ from fastapi import UploadFile
 from config.settings import (
     UPLOAD_DIRECTORY,
     METADATA_DIRECTORY,
-    SUPPORTED_EXTENSIONS
+    SUPPORTED_EXTENSIONS,
+    MAX_UPLOAD_SIZE
 )
 
 
@@ -93,6 +94,14 @@ async def save_uploaded_file(
     )
 
     contents = await file.read()
+
+    if len(contents) > MAX_UPLOAD_SIZE:
+
+        raise ValueError(
+
+            f"File exceeds maximum upload size of {MAX_UPLOAD_SIZE} bytes"
+
+        )
 
     destination.write_bytes(
 

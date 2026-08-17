@@ -181,32 +181,12 @@ async def run_nlp(
 
 
 
-    print(
-
-        "\n========== NLP PAYLOAD =========="
-
-    )
 
 
-    print(
-
-        payload
-
-    )
 
 
-    print(
-
-        type(payload["content"])
-
-    )
 
 
-    print(
-
-        "=================================\n"
-
-    )
 
 
 
@@ -246,32 +226,12 @@ async def run_nlp(
 
 
 
-        print(
-
-            "\n========== NLP RESPONSE =========="
-
-        )
 
 
-        print(
-
-            response.status_code
-
-        )
 
 
-        print(
-
-            response.text
-
-        )
 
 
-        print(
-
-            "==================================\n"
-
-        )
 
 
 

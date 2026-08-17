@@ -16,7 +16,9 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 
+from config.settings import METADATA_DIRECTORY
 from utils.logger import logger
+from utils.validator import validate_document_id
 
 
 
@@ -26,7 +28,7 @@ router = APIRouter()
 
 
 
-METADATA_PATH = "storage/metadata"
+METADATA_PATH = str(METADATA_DIRECTORY)
 
 
 
@@ -57,6 +59,11 @@ async def download_document(
             f"Download request received: {document_id}"
 
         )
+
+        try:
+            document_id = validate_document_id(document_id)
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Document not found")
 
 
 

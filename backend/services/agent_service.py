@@ -126,25 +126,10 @@ async def run_agent(
 
 
 
-    print(
-
-        "\n========== AGENT PAYLOAD =========="
-
-    )
 
 
-    print(
-
-        payload
-
-    )
 
 
-    print(
-
-        "===================================\n"
-
-    )
 
 
 
@@ -185,32 +170,12 @@ async def run_agent(
 
 
 
-        print(
-
-            "\n========== AGENT RESPONSE =========="
-
-        )
 
 
-        print(
-
-            response.status_code
-
-        )
 
 
-        print(
-
-            response.text
-
-        )
 
 
-        print(
-
-            "====================================\n"
-
-        )
 
 
 

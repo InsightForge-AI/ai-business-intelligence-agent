@@ -12,8 +12,6 @@ Responsibilities
 
 from math import sqrt
 
-from analysis.vector_store import get_index
-
 
 def cosine_similarity(
     vector1: list[float],
@@ -77,6 +75,7 @@ def cosine_similarity(
 
 
 def retrieve_chunks(
+    index: list[dict],
     query_embedding: list[float],
     top_k: int = 5
 ) -> list[dict]:
@@ -85,6 +84,13 @@ def retrieve_chunks(
 
     Parameters
     ----------
+    index : list[dict]
+        The document-scoped index returned by
+        analysis.vector_store.build_index() for *this* request. Passed
+        explicitly rather than read from shared module state, so
+        concurrent requests for different documents can never see each
+        other's chunks.
+
     query_embedding : list[float]
 
     top_k : int
@@ -93,8 +99,6 @@ def retrieve_chunks(
     -------
     list[dict]
     """
-
-    index = get_index()
 
     if not index:
 
