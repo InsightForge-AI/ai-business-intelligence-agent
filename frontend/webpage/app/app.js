@@ -177,7 +177,12 @@ const content=document.createElement("div");
 
 content.className="message-content";
 
-content.innerHTML="<pre>"+formatted+"</pre>";
+/* textContent (not innerHTML) so module output -- which can contain
+   user- or module-influenced text -- is always rendered as plain text,
+   never parsed as HTML. */
+const pre=document.createElement("pre");
+pre.textContent=formatted;
+content.appendChild(pre);
 
 
 div.appendChild(content);
@@ -190,7 +195,59 @@ this.scrollBottom();
 
 
 
-callBackend(message,file){
+/* Reads a File as base64 (without the data: URL prefix) so its actual
+   bytes can travel inside the JSON body -- fetch() with a JSON body
+   cannot carry a File object, only its metadata. */
+readFileAsBase64(file){
+
+return new Promise((resolve,reject)=>{
+
+const reader=new FileReader();
+
+reader.onload=()=>{
+
+const result=reader.result;
+const base64=result.substring(result.indexOf(",")+1);
+resolve(base64);
+
+};
+
+reader.onerror=()=>reject(reader.error);
+
+reader.readAsDataURL(file);
+
+});
+
+}
+
+
+
+async callBackend(message,file){
+
+let file_name=null;
+let file_data=null;
+
+if(file){
+
+try{
+
+file_name=file.name;
+file_data=await this.readFileAsBase64(file);
+
+}catch(err){
+
+this.showResult({
+
+agent:["error"],
+module_results:{error:{msg:"failed to read attached file"}}
+
+});
+
+return;
+
+}
+
+}
 
 fetch("http://127.0.0.1:8000/analyze",{
 
@@ -203,7 +260,8 @@ headers:{
 body:JSON.stringify({
 
 query:message,
-file:file?file.name:null
+file_name:file_name,
+file_data:file_data
 
 })
 
@@ -417,6 +475,23 @@ a.click();
 
 
 
+/* Escapes text before it is interpolated into an HTML template string.
+   exportPDF() below builds real HTML (not just a <pre> block like
+   showResult()), so every value that can originate from user input or a
+   downstream module's response must be escaped here. */
+escapeHtml(value){
+
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#39;");
+
+}
+
+
+
 /* PDF export */
 
 exportPDF(){
@@ -473,7 +548,7 @@ html+=`
 
 <div>
 
-<strong>${index+1}. Query :</strong> ${chat.query}
+<strong>${index+1}. Query :</strong> ${this.escapeHtml(chat.query)}
 
 </div>
 
@@ -495,7 +570,7 @@ html+=`
 
 <div>
 
-Agent: ${chat.response.agent.join(", ")}
+Agent: ${this.escapeHtml(chat.response.agent.join(", "))}
 
 </div><br>
 
@@ -512,7 +587,7 @@ html+=`
 
 <div>
 
-<strong>${module.toUpperCase()} RESULT</strong>
+<strong>${this.escapeHtml(module.toUpperCase())} RESULT</strong>
 
 </div>
 
@@ -526,7 +601,7 @@ const result=chat.response.module_results[module];
 
 for(const k in result){
 
-html+=`${k} : ${result[k]}<br>`;
+html+=`${this.escapeHtml(k)} : ${this.escapeHtml(result[k])}<br>`;
 
 }
 

@@ -1,49 +1,64 @@
-import sys
+import shutil
 from pathlib import Path
 
-# 🔥 FIX PATH (IMPORTANT)
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.append(str(BASE_DIR))
-
-# ⬇️ Imports
 from fastapi import FastAPI, UploadFile, File
-from src.image_analysis import analyze_image
-
-app = FastAPI()   # ✅ IMPORTANT
-
-@app.post("/cv/analyze")
-async def cv_analyze(file: UploadFile = File(None)):
-    return await analyze_image(file)
-import shutil
 from PIL import Image
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
+
+from ..src.image_analysis import analyze_image
 
 app = FastAPI()
 
-# 📁 Temp folder for uploads
-UPLOAD_DIR = Path("temp")
+
+class MaxBodySizeMiddleware(BaseHTTPMiddleware):
+    """Rejects uploads whose declared Content-Length exceeds a cap.
+
+    Nothing enforced a size limit before -- any upload size was accepted
+    and fully buffered to disk before validation. Content-Length check
+    only (not streaming enforcement), same tradeoff as backend/main.py.
+    """
+
+    def __init__(self, app, max_bytes):
+        super().__init__(app)
+        self.max_bytes = max_bytes
+
+    async def dispatch(self, request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length is not None and int(content_length) > self.max_bytes:
+            return JSONResponse(
+                {"error": "Request body too large"}, status_code=413
+            )
+        return await call_next(request)
+
+
+app.add_middleware(MaxBodySizeMiddleware, max_bytes=10 * 1024 * 1024)
+
+# Upload folder anchored to this module's own location, not the process's
+# current working directory (which varies depending on how the service is
+# launched -- run.py, a direct uvicorn invocation, or a test runner).
+UPLOAD_DIR = Path(__file__).resolve().parent / "temp"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-# ✅ Validation Function
 def check_image(file: UploadFile):
-    
+
     if file is None:
         return "not found"
-    
+
     if file.filename == "" or file.filename is None:
         return "not found"
-    
+
     if not file.filename.lower().endswith(("jpg", "jpeg", "png")):
         return "Invalid format"
-    
+
     return "valid"
 
 
-# 🚀 API Endpoint
 @app.post("/cv/analyze")
 async def analyze(file: UploadFile = File(None)):
-    
-    # ✅ Step 1: Validation
+
+    # Step 1: Validation
     valid = check_image(file)
     if valid != "valid":
         return {
@@ -52,14 +67,17 @@ async def analyze(file: UploadFile = File(None)):
             "file_name": file.filename if file else None
         }
 
-    file_path = UPLOAD_DIR / file.filename
+    # Strip any directory components from the untrusted filename so it can
+    # never escape UPLOAD_DIR (e.g. "../../evil.png" -> "evil.png").
+    safe_name = Path(file.filename).name
+    file_path = UPLOAD_DIR / safe_name
 
     try:
-        # ✅ Step 2: Save file
+        # Step 2: Save file
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # ✅ NEW: Empty file check 🔥
+        # Step 3: Empty file check
         if file_path.stat().st_size == 0:
             return {
                 "status": "error",
@@ -67,21 +85,20 @@ async def analyze(file: UploadFile = File(None)):
                 "file_name": file.filename
             }
 
-        # ✅ Step 3: Corrupt image check
+        # Step 4: Corrupt image check
         try:
             img = Image.open(file_path)
             img.verify()
-        except:
+        except Exception:
             return {
                 "status": "error",
                 "message": "Corrupt image",
                 "file_name": file.filename
             }
 
-        # ✅ Step 4: Call existing logic
+        # Step 5: Real analysis
         result = analyze_image(file_path)
 
-        # ✅ Step 5: Handle empty result
         if not result:
             return {
                 "status": "error",
@@ -89,7 +106,7 @@ async def analyze(file: UploadFile = File(None)):
                 "file_name": file.filename
             }
 
-        # ✅ Step 6: Success response
+        # Step 6: Success response
         return {
             "status": "success",
             "file_name": file.filename,
@@ -102,3 +119,5 @@ async def analyze(file: UploadFile = File(None)):
             "message": "Processing failed",
             "file_name": file.filename if file else None
         }
+    finally:
+        file_path.unlink(missing_ok=True)

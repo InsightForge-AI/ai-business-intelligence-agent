@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+backend/logs/*.log
+cv/teamB/api/temp/
+.pytest_cache/

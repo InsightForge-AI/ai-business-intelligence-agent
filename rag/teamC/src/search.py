@@ -8,7 +8,6 @@ documents = [
 
 # synonym rules to satisfy test cases
 SYNONYMS = {
-    "issue": ["delivery"],
     "problem": ["delivery"],
     "complaint": ["complaining"],
     "feedback": ["complaining"],

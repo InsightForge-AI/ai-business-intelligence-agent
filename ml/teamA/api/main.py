@@ -2,6 +2,8 @@ import os, importlib.util
 import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 from typing import Union
 
 def load(name, path):
@@ -18,6 +20,29 @@ analyze = load("a", os.path.join(SRC, "analysis.py")).analyze
 get_insights = load("i", os.path.join(SRC, "insights.py")).get_insights
 
 app = FastAPI()
+
+
+class MaxBodySizeMiddleware(BaseHTTPMiddleware):
+    """Rejects requests whose declared Content-Length exceeds a cap.
+
+    Nothing enforced a size limit before. Content-Length check only, same
+    tradeoff noted in backend/main.py's copy of this middleware.
+    """
+
+    def __init__(self, app, max_bytes):
+        super().__init__(app)
+        self.max_bytes = max_bytes
+
+    async def dispatch(self, request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length is not None and int(content_length) > self.max_bytes:
+            return JSONResponse(
+                {"error": "Request body too large"}, status_code=413
+            )
+        return await call_next(request)
+
+
+app.add_middleware(MaxBodySizeMiddleware, max_bytes=2 * 1024 * 1024)
 
 class SalesRequest(BaseModel):
     data: Union[str, dict[str, float]]
