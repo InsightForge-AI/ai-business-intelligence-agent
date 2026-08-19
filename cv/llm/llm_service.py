@@ -28,36 +28,45 @@ async def generate_insights(
     Returns
     -------
     dict
+        Empty on any failure (prompt/LLM/parse). cv_service.py already
+        reads every field via `llm.get(key, deterministic_fallback)`, so
+        an empty dict here means callers transparently keep their own
+        OCR/extraction results instead of the API raising a 500 --
+        matching how ml/rag already degrade when their LLM is unavailable.
     """
 
-    # --------------------------------------------------
-    # Build Prompt
-    # --------------------------------------------------
+    try:
 
-    prompt = build_prompt(
+        # --------------------------------------------------
+        # Build Prompt
+        # --------------------------------------------------
 
-        context
+        prompt = build_prompt(
 
-    )
+            context
 
-    # --------------------------------------------------
-    # Call Llama
-    # --------------------------------------------------
+        )
 
-    llm_response = await generate(
+        # --------------------------------------------------
+        # Call Llama
+        # --------------------------------------------------
 
-        prompt
+        llm_response = await generate(
 
-    )
+            prompt
 
-    # --------------------------------------------------
-    # Parse Response
-    # --------------------------------------------------
+        )
 
-    parsed_response = parse_response(
+        # --------------------------------------------------
+        # Parse Response
+        # --------------------------------------------------
 
-        llm_response
+        return parse_response(
 
-    )
+            llm_response
 
-    return parsed_response
+        )
+
+    except Exception:
+
+        return {}

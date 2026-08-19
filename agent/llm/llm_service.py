@@ -34,36 +34,45 @@ async def detect_intent(
     str
     """
 
-    # --------------------------------------------------
-    # Build Prompt
-    # --------------------------------------------------
+    # Any failure here (prompt build, Phi-3 call, or parsing) returns ""
+    # rather than raising -- routing/intent_detector.py already has
+    # `if not intent: return "general_query"`, a fallback written for
+    # an empty LLM response that this reuses for a failed one too,
+    # instead of the API raising a 500.
+    try:
 
-    prompt = build_prompt(
+        # --------------------------------------------------
+        # Build Prompt
+        # --------------------------------------------------
 
-        query=query,
+        prompt = build_prompt(
 
-        metadata=metadata
+            query=query,
 
-    )
+            metadata=metadata
 
-    # --------------------------------------------------
-    # Phi-3
-    # --------------------------------------------------
+        )
 
-    llm_response = await generate(
+        # --------------------------------------------------
+        # Phi-3
+        # --------------------------------------------------
 
-        prompt
+        llm_response = await generate(
 
-    )
+            prompt
 
-    # --------------------------------------------------
-    # Parse Response
-    # --------------------------------------------------
+        )
 
-    intent = parse_response(
+        # --------------------------------------------------
+        # Parse Response
+        # --------------------------------------------------
 
-        llm_response
+        return parse_response(
 
-    )
+            llm_response
 
-    return intent
+        )
+
+    except Exception:
+
+        return ""
