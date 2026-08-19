@@ -33,6 +33,7 @@ from config.settings import (
 
 
 from utils.logger import logger
+from utils.validator import validate_document_id
 
 
 
@@ -171,7 +172,15 @@ def get_uploaded_file(
 ) -> dict:
     """
     Retrieve uploaded file information.
+
+    Every current caller (orchestration_service.py, reached only after
+    backend/api/analyze.py's get_document() already validated the same
+    ID) happens to be safe today, but that's the caller's discipline, not
+    this function's -- validating here too means a future caller can't
+    reintroduce path traversal by forgetting to validate first.
     """
+
+    file_id = validate_document_id(file_id)
 
     metadata_file = (
 
