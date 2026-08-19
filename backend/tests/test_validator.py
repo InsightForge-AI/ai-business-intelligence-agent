@@ -66,3 +66,18 @@ class TestValidateDocumentId:
 
         result = asyncio.run(get_document("../../../etc/passwd"))
         assert result is None
+
+    def test_traversal_payload_cannot_reach_the_filesystem_via_get_uploaded_file(self):
+        """
+        services/storage_service.get_uploaded_file() is only reachable
+        today via orchestration_service.py, after backend/api/analyze.py
+        has already validated the same document_id through get_document()
+        -- but that's caller discipline, not a property of this function.
+        Validating directly inside get_uploaded_file() too means a future
+        caller can't reintroduce traversal by skipping that upstream
+        check.
+        """
+        from services.storage_service import get_uploaded_file
+
+        with pytest.raises(ValueError):
+            get_uploaded_file("../../../etc/passwd")
