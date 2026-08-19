@@ -3,6 +3,14 @@ import sys
 import os
 import time
 
+# Windows consoles often default to a legacy codepage (e.g. cp1252) that
+# can't encode the emoji used in this script's own print()s below, which
+# crashes the launcher before any service starts. Force UTF-8 on stdout/
+# stderr so this works regardless of the host console's configured codepage.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 BASE_DIR = os.getcwd()
 PYTHON = sys.executable
 
