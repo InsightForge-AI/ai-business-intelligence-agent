@@ -13,9 +13,13 @@ Responsibilities
 • Start Backend server
 """
 
+from pathlib import Path
+
 from fastapi import FastAPI
 
 from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.staticfiles import StaticFiles
 
 
 from api.routes import router
@@ -52,8 +56,9 @@ app = FastAPI(
 # allow_credentials is intentionally False: combining a wildcard origin
 # with allow_credentials=True makes Starlette reflect back *any* request
 # Origin verbatim with credentials allowed, i.e. no real CORS protection.
-# No frontend exists yet on this branch to pin allow_origins to a known
-# value -- once one does, replace "*" with its actual origin(s).
+# The bundled frontend (mounted below at /ui) is same-origin and doesn't
+# need this at all -- "*" stays here only for hitting the API directly
+# from tools like a separately-hosted frontend, Postman, or curl.
 app.add_middleware(
 
     CORSMiddleware,
@@ -85,6 +90,38 @@ app.include_router(
     router
 
 )
+
+
+
+
+
+# ---------------------------------------------------------
+# Frontend (static files)
+# ---------------------------------------------------------
+
+# frontend/webpage/ is untracked (see .gitignore) -- a local-only UI for
+# manual testing, not a tracked part of this repo. Mounted under /ui, not
+# "/", so the existing root/docs/api routes above are unaffected either
+# way. On a fresh clone without that directory, this mount simply never
+# happens and /ui 404s -- that's expected, not a bug.
+
+FRONTEND_DIRECTORY = (
+
+    Path(__file__).resolve().parent.parent / "frontend" / "webpage"
+
+)
+
+if FRONTEND_DIRECTORY.is_dir():
+
+    app.mount(
+
+        "/ui",
+
+        StaticFiles(directory=str(FRONTEND_DIRECTORY), html=True),
+
+        name="ui"
+
+    )
 
 
 
