@@ -42,3 +42,7 @@ dist/
 backend/storage/uploads/
 backend/storage/temp_uploads/
 backend/storage/metadata/
+
+# Local-only web UI -- not part of the tracked project (kept on disk
+# for local testing only; backend/app.py mounts it at /ui if present).
+frontend/webpage/

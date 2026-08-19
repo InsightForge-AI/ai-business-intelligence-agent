@@ -9,7 +9,8 @@ or LLM calls ever leave your machine.
 
 ## What it does
 
-1. You upload a document through the web UI (or `POST /api/upload`).
+1. You upload a document via `POST /api/upload` (or the backend's
+   `/docs` page, which gives you a form for every endpoint).
 2. The **agent** service reads your query and the document's metadata,
    asks a local LLM (Phi-3) to classify intent, and decides which
    analysis modules the request actually needs.
@@ -27,7 +28,7 @@ or LLM calls ever leave your machine.
 
 ```
                          ┌─────────────┐
-   Browser ── /ui ──────▶│   backend    │── orchestrates ──┐
+   Client ──── /api ────▶│   backend    │── orchestrates ──┐
                          │  (port 8000) │                   │
                          └─────────────┘                    │
                                                               ▼
@@ -58,9 +59,9 @@ pip install -r requirements.txt
 python run.py
 ```
 
-This starts all 6 services. Open **http://127.0.0.1:8000/ui** for the
-web UI, or **http://127.0.0.1:8000/docs** for the backend's interactive
-API docs (each service also exposes its own `/docs` on its own port).
+This starts all 6 services. Open **http://127.0.0.1:8000/docs** for the
+backend's interactive API docs (each service also exposes its own
+`/docs` on its own port).
 
 ### Enabling real LLM output (optional)
 
@@ -107,6 +108,3 @@ combined `pytest` run from the repo root doesn't work.
 - **No authentication.** Anyone who can reach a service's port can use
   it. Fine for local/offline use; would need addressing before any
   multi-user or internet-facing deployment.
-- **The web UI at `/ui` is intentionally minimal** — upload, list,
-  analyze, download, delete. It's there to demonstrate the pipeline
-  end-to-end, not as a polished product UI.

@@ -99,9 +99,11 @@ app.include_router(
 # Frontend (static files)
 # ---------------------------------------------------------
 
-# Mounted under /ui, not "/", so the existing root/docs/api routes above
-# keep working exactly as before -- this only adds a UI, it doesn't
-# replace anything.
+# frontend/webpage/ is untracked (see .gitignore) -- a local-only UI for
+# manual testing, not a tracked part of this repo. Mounted under /ui, not
+# "/", so the existing root/docs/api routes above are unaffected either
+# way. On a fresh clone without that directory, this mount simply never
+# happens and /ui 404s -- that's expected, not a bug.
 
 FRONTEND_DIRECTORY = (
 
@@ -220,12 +222,7 @@ async def root():
 
         "status":
 
-            "running",
-
-
-        "ui":
-
-            "/ui"
+            "running"
 
 
     }

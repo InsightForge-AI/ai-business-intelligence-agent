@@ -1,6 +1,11 @@
 """
-Smoke tests for the top-level app: the root endpoint and the bundled
-frontend mounted at /ui (backend/app.py).
+Smoke test for the top-level app's root endpoint.
+
+backend/app.py also conditionally mounts a local-only frontend at /ui if
+frontend/webpage/ exists on disk -- that directory is untracked (see
+.gitignore) and not part of this repo, so it's deliberately not tested
+here: on a fresh clone it won't exist, and asserting on it would fail
+for everyone except whoever has that folder locally.
 """
 
 from fastapi.testclient import TestClient
@@ -17,19 +22,3 @@ def test_root_reports_running_status():
     body = response.json()
 
     assert body["status"] == "running"
-    assert body["ui"] == "/ui"
-
-
-def test_ui_serves_index_html():
-    response = client.get("/ui/")
-
-    assert response.status_code == 200
-    assert "text/html" in response.headers["content-type"]
-    assert "DocuMind" in response.text
-
-
-def test_ui_serves_static_assets():
-    response = client.get("/ui/app.js")
-
-    assert response.status_code == 200
-    assert "/api/documents" in response.text
