@@ -13,9 +13,13 @@ Responsibilities
 • Start Backend server
 """
 
+from pathlib import Path
+
 from fastapi import FastAPI
 
 from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.staticfiles import StaticFiles
 
 
 from api.routes import router
@@ -52,8 +56,9 @@ app = FastAPI(
 # allow_credentials is intentionally False: combining a wildcard origin
 # with allow_credentials=True makes Starlette reflect back *any* request
 # Origin verbatim with credentials allowed, i.e. no real CORS protection.
-# No frontend exists yet on this branch to pin allow_origins to a known
-# value -- once one does, replace "*" with its actual origin(s).
+# The bundled frontend (mounted below at /ui) is same-origin and doesn't
+# need this at all -- "*" stays here only for hitting the API directly
+# from tools like a separately-hosted frontend, Postman, or curl.
 app.add_middleware(
 
     CORSMiddleware,
@@ -85,6 +90,36 @@ app.include_router(
     router
 
 )
+
+
+
+
+
+# ---------------------------------------------------------
+# Frontend (static files)
+# ---------------------------------------------------------
+
+# Mounted under /ui, not "/", so the existing root/docs/api routes above
+# keep working exactly as before -- this only adds a UI, it doesn't
+# replace anything.
+
+FRONTEND_DIRECTORY = (
+
+    Path(__file__).resolve().parent.parent / "frontend" / "webpage"
+
+)
+
+if FRONTEND_DIRECTORY.is_dir():
+
+    app.mount(
+
+        "/ui",
+
+        StaticFiles(directory=str(FRONTEND_DIRECTORY), html=True),
+
+        name="ui"
+
+    )
 
 
 
@@ -185,7 +220,12 @@ async def root():
 
         "status":
 
-            "running"
+            "running",
+
+
+        "ui":
+
+            "/ui"
 
 
     }

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocuMind</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">📄</span>
+    <span class="brand-name">DocuMind</span>
+  </div>
+  <div class="status" id="serviceStatus">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">Checking backend…</span>
+  </div>
+</header>
+
+<main>
+
+  <section class="panel upload-panel">
+    <h2>Upload a document</h2>
+    <p class="hint">PDF, DOCX, XLSX, CSV, PNG, JPG — analyzed by the agent, ml, nlp, cv, and rag services.</p>
+
+    <label class="dropzone" id="dropzone" for="fileInput">
+      <input type="file" id="fileInput" hidden>
+      <span id="dropzoneText">Drop a file here, or click to browse</span>
+    </label>
+
+    <div id="uploadMsg" class="msg"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Documents</h2>
+      <button id="refreshBtn" class="btn btn-ghost">↻ Refresh</button>
+    </div>
+
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Size</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="docTableBody">
+        <tr><td colspan="5" class="empty">No documents yet — upload one above.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel" id="resultPanel" hidden>
+    <div class="panel-header">
+      <h2 id="resultTitle">Analysis result</h2>
+      <button id="closeResultBtn" class="btn btn-ghost">✕ Close</button>
+    </div>
+
+    <div id="resultBody" class="result-body"></div>
+  </section>
+
+</main>
+
+<footer>
+  DocuMind — agent · ml · nlp · cv · rag, orchestrated by the backend service.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

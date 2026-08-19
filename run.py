@@ -127,6 +127,7 @@ try:
     print("✅ All DocuMind services started.")
     print("========================================\n")
 
+    print("Web UI       : http://127.0.0.1:8000/ui")
     print("Backend Docs : http://127.0.0.1:8000/docs")
     print("Agent Docs   : http://127.0.0.1:8001/docs")
     print("ML Docs      : http://127.0.0.1:8002/docs")
